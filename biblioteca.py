@@ -9,9 +9,7 @@ def carregar_hqs():
 
     if not biblioteca.exists():
         return hqs
-    
-    for arquivo in biblioteca.rglob("*"):
-        
+    for arquivo in biblioteca.rglob("*"):     
         if arquivo.suffix.lower() in (".cbr", ".cbz"):
             hqs.append(arquivo)
 
