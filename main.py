@@ -15,8 +15,8 @@ if __name__ == "__main__":
 
 
 # Mostrar nome das hq's no terminal
-# for hq in hqs:
-    # print(hq.name)
+ #for hq in hqs:
+     #print(hq.name)
 
 # Mostrar a quantidades de HQ's 
 # print(f"AQUI TEM {len(hqs)} HQ'S")

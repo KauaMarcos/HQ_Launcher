@@ -14,5 +14,5 @@ def carregar_hqs():
     for arquivo in biblioteca.rglob("*"):     
         if arquivo.suffix.lower() in (".cbr", ".cbz"):
             hqs.append(arquivo)
-
+    
     return hqs
