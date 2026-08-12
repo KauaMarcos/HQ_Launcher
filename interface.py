@@ -1,14 +1,11 @@
 import tkinter as tk
 from biblioteca import carregar_hqs
-
+from Launcher import abrir_hq   
 # Função de carregar hq dentro da interface,
 # aí pega a função de carregar_hq de biblioteca
 # foi criado uma variável lista_hqs pra colocar dentro da interface
 def carregar_hq_interface(lista_hqs, hqs):
     hqs = carregar_hqs()
-
-    print(hqs)
-    print(f"AQUI TEM {len(hqs)} HQS \n")
 
     # Foi criado para não duplicar as Hqs ao clicar no botão mais de uma vez
     lista_hqs.delete(0, tk.END)
@@ -22,10 +19,20 @@ def selecionar_hq(lista_hqs, hqs):
     selecao = lista_hqs.curselection()
 
     if selecao:
-        indice = selecao[0]
-        hq = hqs[indice]
-        print(f"Indice selecionado: {indice} \n")
+        hq = hqs[selecao[0]]
         print(f"Hq Selecionada foi: {hq} \n")
+
+def abrir_hq_interface(lista_hqs, hqs):
+    hq_selecionada = lista_hqs.curselection()
+
+    if not hq_selecionada:
+        print("Nenhuma HQ Selecionada.")
+        return
+    hq = lista_hqs.get(hq_selecionada[0])
+
+    print(f"HQ Selecionada: {hq}")
+
+    abrir_hq(hq)
 # Função para iniciar interface
 def iniciar_interface():
 
@@ -74,6 +81,10 @@ def iniciar_interface():
 
     button_selecion.pack()
 
+    button_open_hq = tk.Button(frame_hqs,
+                              text="ABRIR HQ",
+                              command=lambda: abrir_hq_interface(lista_hqs, hqs))
 
+    button_open_hq.pack()
     # Loop da interface, ao fechar será cancelado o loop
     janela.mainloop() 

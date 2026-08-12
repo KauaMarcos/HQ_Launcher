@@ -1,5 +1,4 @@
 
-
 # caminho onde está as Hqs 
 caminho_hqs = r"C:\Users\Kauã\Documents\HQS"
 
