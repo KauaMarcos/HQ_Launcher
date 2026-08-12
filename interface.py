@@ -4,7 +4,7 @@ from biblioteca import carregar_hqs
 # Função de carregar hq dentro da interface,
 # aí pega a função de carregar_hq de biblioteca
 # foi criado uma variável lista_hqs pra colocar dentro da interface
-def carregar_hq_interface(lista_hqs):
+def carregar_hq_interface(lista_hqs, hqs):
     hqs = carregar_hqs()
 
     print(hqs)
@@ -16,6 +16,16 @@ def carregar_hq_interface(lista_hqs):
     for hq in hqs:
         lista_hqs.insert(tk.END, hq)
 
+
+def selecionar_hq(lista_hqs, hqs):
+
+    selecao = lista_hqs.curselection()
+
+    if selecao:
+        indice = selecao[0]
+        hq = hqs[indice]
+        print(f"Indice selecionado: {indice} \n")
+        print(f"Hq Selecionada foi: {hq} \n")
 # Função para iniciar interface
 def iniciar_interface():
 
@@ -44,15 +54,26 @@ def iniciar_interface():
 
     lista_hqs.pack()
 
+    hqs = carregar_hqs()
+
     # Botão para abrir HQ,
     # command=lambda: dar um comando para chamar a função carregar_hq_interface
     # e mostrar as hqs com lista_hqs
     button = tk.Button(frame_hqs,
                         text="CARREGAR HQS",
-                          command=lambda:carregar_hq_interface(lista_hqs))
+                          command=lambda:carregar_hq_interface(lista_hqs, hqs))
 
     # Posiciona o Botão dentro do Frame
     button.pack()
 
+
+    button_selecion = tk.Button(frame_hqs,
+                                 text="VER SELEÇÃO",
+                                 command=lambda: selecionar_hq(lista_hqs, hqs))
+
+
+    button_selecion.pack()
+
+
     # Loop da interface, ao fechar será cancelado o loop
-    janela.mainloop()
+    janela.mainloop() 
