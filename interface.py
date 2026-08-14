@@ -1,7 +1,13 @@
 import tkinter as tk
-from biblioteca import carregar_hqs
+import zipfile
+import rarfile
+from io import BytesIO
+from PIL import Image, ImageTk
+from biblioteca import carregar_hqs, pegar_capa
 from Launcher import abrir_hq
 
+
+### CORES DA INTERFACE ###
 
 COR_DO_FUNDO = "#101014"
 COR_DO_PAINEL = "#18181f"
@@ -26,20 +32,43 @@ def carregar_hq_interface(lista_hqs, hqs):
 
 
 # Foi criado para Selecionar as hqs na interface
-def selecionar_hq(lista_hqs, hqs, texto_selecao):
+def selecionar_hq(lista_hqs, hqs, texto_selecao, capa_hq):
 
     selecao = lista_hqs.curselection()
 
     if selecao:
+
         hq = hqs[selecao[0]]
 
-        print(f"Hq Selecionada foi: {hq} \n")
+        print(f"Hq Selecionada foi: {hq}\n")
 
         # Atualiza o texto do painel de informações
         texto_selecao.config(
             text=f"HQ selecionada:\n\n{hq.name}"
         )
 
+        dados_capa = pegar_capa(hq)
+
+        if dados_capa:
+            # Converte os dados da capa em uma imagem
+            imagem = Image.open(BytesIO(dados_capa))
+
+    # Redimensiona a capa para caber no painel
+            imagem.thumbnail((220, 300))
+
+    # Converte a imagem para o formato usado pelo Tkinter
+            capa_tk = ImageTk.PhotoImage(imagem)
+
+    # Mostra a capa no Label
+            capa_hq.config(image=capa_tk)
+
+    # Mantém a imagem na memória
+            capa_hq.image = capa_tk
+
+            print("Capa carregada com sucesso!\n")
+        else:
+
+            print("Capa não encontrada!")
 
 # Foi Criado para abrir a hq selecionada na interface
 def abrir_hq_interface(lista_hqs, hqs):
@@ -47,7 +76,9 @@ def abrir_hq_interface(lista_hqs, hqs):
     hq_selecionada = lista_hqs.curselection()
 
     if not hq_selecionada:
+
         print("Nenhuma HQ Selecionada.")
+
         return
 
     hq = hqs[hq_selecionada[0]]
@@ -73,7 +104,8 @@ def iniciar_interface():
     janela.configure(bg=COR_DO_FUNDO)
 
     janela.resizable(False, False)
-    
+
+
     # Área responsável pelo cabeçalho da interface
     cabeçalho = tk.Frame(
         janela,
@@ -86,6 +118,7 @@ def iniciar_interface():
         padx=30,
         pady=(25, 15)
     )
+
 
     # Título principal do programa
     titulo = tk.Label(
@@ -115,6 +148,7 @@ def iniciar_interface():
         pady=(3, 0)
     )
 
+
     # Área onde ficarão os principais elementos do Launcher
     area_principal = tk.Frame(
         janela,
@@ -129,6 +163,7 @@ def iniciar_interface():
         pady=10
     )
 
+
     # Painel onde ficará a lista de HQs
     painel_biblioteca = tk.Frame(
         area_principal,
@@ -142,13 +177,13 @@ def iniciar_interface():
         expand=True
     )
 
+
     # painel onde ficará as informações da HQ selecionada
     painel_info = tk.Frame(
         area_principal,
         bg=COR_DO_PAINEL
     )
 
-    # Posiciona o painel no lado direito
     painel_info.pack(
         side="right",
         fill="both",
@@ -190,6 +225,19 @@ def iniciar_interface():
         pady=10
     )
 
+
+    # Área onde será mostrada a capa da HQ selecionada
+    capa_hq = tk.Label(
+        painel_info,
+        bg=COR_DO_PAINEL
+    )
+
+    # Posiciona a capa dentro do painel
+    capa_hq.pack(
+        pady=10
+    )
+
+
     # Título da biblioteca de HQs
     titulo_biblioteca = tk.Label(
         painel_biblioteca,
@@ -206,9 +254,6 @@ def iniciar_interface():
         pady=(20, 10)
     )
 
-
-    # Carrega as HQs usando a função carregar_hqs
-    hqs = carregar_hqs()
 
     # Componente para Lista de HQs na interface
     lista_hqs = tk.Listbox(
@@ -230,15 +275,6 @@ def iniciar_interface():
         pady=(0, 15)
     )
 
-    # Atualiza o painel de informações ao selecionar uma HQ
-    lista_hqs.bind(
-        "<<ListboxSelect>>",
-        lambda evento: selecionar_hq(
-            lista_hqs,
-            hqs,
-            texto_selecao
-        )
-    )
 
     # Área responsável por organizar os botões
     painel_botoes = tk.Frame(
@@ -252,6 +288,7 @@ def iniciar_interface():
         padx=20,
         pady=(0, 20)
     )
+
 
     # Botão para Carregar HQ,
     # command=lambda: dar um comando para chamar a função carregar_hq_interface
@@ -278,6 +315,7 @@ def iniciar_interface():
         ipady=8
     )
 
+
     # Botão para Selencionar HQ,
     # command=lambda: dar um comando para chamar a função selecionar_hq
     # e mostrar as hqs com lista_hqs
@@ -287,7 +325,8 @@ def iniciar_interface():
         command=lambda: selecionar_hq(
             lista_hqs,
             hqs,
-            texto_selecao
+            texto_selecao,
+            capa_hq
         ),
         bg=COR_DO_FUNDO,
         fg=COR_TEXTO,
@@ -307,12 +346,16 @@ def iniciar_interface():
         ipady=8
     )
 
+
     # Botão para Abrir HQ,
     # command=lambda: dar um comando para chamar a função abrir_hq_interface
     button_open_hq = tk.Button(
         painel_botoes,
         text="ABRIR HQ",
-        command=lambda: abrir_hq_interface(lista_hqs, hqs),
+        command=lambda: abrir_hq_interface(
+            lista_hqs,
+            hqs
+        ),
         bg=COR_DO_FUNDO,
         fg=COR_TEXTO,
         activebackground=COR_DESTAQUE,
@@ -329,6 +372,22 @@ def iniciar_interface():
         fill="x",
         padx=(5, 0),
         ipady=8
+    )
+
+
+    # Carrega as HQs usando a função carregar_hqs
+    hqs = carregar_hqs()
+
+
+    # Evento responsável por detectar quando uma HQ é selecionada
+    lista_hqs.bind(
+        "<<ListboxSelect>>",
+        lambda evento: selecionar_hq(
+            lista_hqs,
+            hqs,
+            texto_selecao,
+            capa_hq
+        )
     )
 
 
