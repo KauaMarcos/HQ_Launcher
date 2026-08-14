@@ -4,19 +4,8 @@ from interface import iniciar_interface
 hqs = carregar_hqs()
 
 
-# Abrir Hq pelo index
-# if hqs:
-# abrir_hq(hqs[8])
-
+# Executa a interface apenas quando o arquivo main.py
+#  é chamado diretamente no terminal
 
 if __name__ == "__main__":
     iniciar_interface()
-
-
-
-# Mostrar nome das hq's no terminal
-# for hq in hqs:
-    # print(hq.name)
-
-# Mostrar a quantidades de HQ's
-# print(f"AQUI TEM {len(hqs)} HQ'S")

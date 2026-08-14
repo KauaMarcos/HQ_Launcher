@@ -3,8 +3,6 @@ from biblioteca import carregar_hqs
 from Launcher import abrir_hq
 
 
-
-
 COR_DO_FUNDO = "#101014"
 COR_DO_PAINEL = "#18181f"
 COR_TEXTO = "#FFFFFF"
@@ -24,17 +22,23 @@ def carregar_hq_interface(lista_hqs, hqs):
 
     # Foi criado para inserir cada hq do inicio ao fim da pasta
     for hq in hqs:
-        lista_hqs.insert(tk.END, hq)
+        lista_hqs.insert(tk.END, hq.name)
 
 
 # Foi criado para Selecionar as hqs na interface
-def selecionar_hq(lista_hqs, hqs):
+def selecionar_hq(lista_hqs, hqs, texto_selecao):
 
     selecao = lista_hqs.curselection()
 
     if selecao:
         hq = hqs[selecao[0]]
+
         print(f"Hq Selecionada foi: {hq} \n")
+
+        # Atualiza o texto do painel de informações
+        texto_selecao.config(
+            text=f"HQ selecionada:\n\n{hq.name}"
+        )
 
 
 # Foi Criado para abrir a hq selecionada na interface
@@ -46,7 +50,7 @@ def abrir_hq_interface(lista_hqs, hqs):
         print("Nenhuma HQ Selecionada.")
         return
 
-    hq = lista_hqs.get(hq_selecionada[0])
+    hq = hqs[hq_selecionada[0]]
 
     print(f"HQ Selecionada: {hq}")
 
@@ -69,7 +73,7 @@ def iniciar_interface():
     janela.configure(bg=COR_DO_FUNDO)
 
     janela.resizable(False, False)
-
+    
     # Área responsável pelo cabeçalho da interface
     cabeçalho = tk.Frame(
         janela,
@@ -82,7 +86,6 @@ def iniciar_interface():
         padx=30,
         pady=(25, 15)
     )
-
 
     # Título principal do programa
     titulo = tk.Label(
@@ -139,6 +142,54 @@ def iniciar_interface():
         expand=True
     )
 
+    # painel onde ficará as informações da HQ selecionada
+    painel_info = tk.Frame(
+        area_principal,
+        bg=COR_DO_PAINEL
+    )
+
+    # Posiciona o painel no lado direito
+    painel_info.pack(
+        side="right",
+        fill="both",
+        expand=True,
+        padx=(10, 0)
+    )
+
+
+    # Título do painel de informações
+    titulo_informacoes = tk.Label(
+        painel_info,
+        text="📖 Informações",
+        fg=COR_TEXTO,
+        bg=COR_DO_PAINEL,
+        font=("Arial", 14, "bold")
+    )
+
+    # Posiciona o título dentro do painel
+    titulo_informacoes.pack(
+        anchor="w",
+        padx=20,
+        pady=(20, 10)
+    )
+
+
+    # Texto que será mostrado quando nenhuma HQ estiver selecionada
+    texto_selecao = tk.Label(
+        painel_info,
+        text="Nenhuma HQ selecionada",
+        fg=COR_TEXTO_SECUNDARIO,
+        bg=COR_DO_PAINEL,
+        font=("Arial", 11)
+    )
+
+    # Posiciona o texto dentro do painel
+    texto_selecao.pack(
+        anchor="w",
+        padx=20,
+        pady=10
+    )
+
     # Título da biblioteca de HQs
     titulo_biblioteca = tk.Label(
         painel_biblioteca,
@@ -154,6 +205,10 @@ def iniciar_interface():
         padx=20,
         pady=(20, 10)
     )
+
+
+    # Carrega as HQs usando a função carregar_hqs
+    hqs = carregar_hqs()
 
     # Componente para Lista de HQs na interface
     lista_hqs = tk.Listbox(
@@ -173,6 +228,16 @@ def iniciar_interface():
         expand=True,
         padx=20,
         pady=(0, 15)
+    )
+
+    # Atualiza o painel de informações ao selecionar uma HQ
+    lista_hqs.bind(
+        "<<ListboxSelect>>",
+        lambda evento: selecionar_hq(
+            lista_hqs,
+            hqs,
+            texto_selecao
+        )
     )
 
     # Área responsável por organizar os botões
@@ -213,18 +278,17 @@ def iniciar_interface():
         ipady=8
     )
 
-
-    # =========================
-    # BOTÃO VER SELEÇÃO
-    # =========================
-
     # Botão para Selencionar HQ,
     # command=lambda: dar um comando para chamar a função selecionar_hq
     # e mostrar as hqs com lista_hqs
     button_selecion = tk.Button(
         painel_botoes,
         text="VER SELEÇÃO",
-        command=lambda: selecionar_hq(lista_hqs, hqs),
+        command=lambda: selecionar_hq(
+            lista_hqs,
+            hqs,
+            texto_selecao
+        ),
         bg=COR_DO_FUNDO,
         fg=COR_TEXTO,
         activebackground=COR_DESTAQUE,
@@ -266,10 +330,6 @@ def iniciar_interface():
         padx=(5, 0),
         ipady=8
     )
-
-
-    # Carrega as HQs usando a função carregar_hqs
-    hqs = carregar_hqs()
 
 
     # Loop da interface, ao fechar será cancelado o loop
