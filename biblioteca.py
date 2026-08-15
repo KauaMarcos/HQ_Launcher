@@ -4,7 +4,9 @@ import zipfile
 import rarfile
 import subprocess
 import tempfile
+
 rarfile.UNRAR_TOOL = r"C:\Program Files\WinRAR\WinRAR.exe"
+
 
 # Função para carregar as Hq's, pega o caminho_hqs de config.py,
 # e faz uma lista das Hq's, adicionando extensões .cbr e .cbz
@@ -27,7 +29,6 @@ def carregar_hqs():
 
 # Função responsável por encontrar a capa da HQ
 def pegar_capa(hq):
-
 
     # Verifica se a HQ é CBZ
     if hq.suffix.lower() == ".cbz":
@@ -94,3 +95,63 @@ def pegar_capa(hq):
 
 
     return None
+
+
+# Função responsável por contar as páginas da HQ
+def contar_paginas(hq):
+
+    # Verifica se a HQ é CBZ
+    if hq.suffix.lower() == ".cbz":
+
+        with zipfile.ZipFile(hq, "r") as arquivo:
+
+            imagens = [
+                nome for nome in arquivo.namelist()
+                if nome.lower().endswith(
+                    (".jpg", ".jpeg", ".png", ".webp")
+                )
+            ]
+
+            return len(imagens)
+
+
+    # Verifica se a HQ é CBR
+    elif hq.suffix.lower() == ".cbr":
+
+        winrar = r"C:\Program Files\WinRAR\WinRAR.exe"
+
+        pasta_temp = Path(
+            tempfile.mkdtemp()
+        )
+
+        comando = [
+            winrar,
+            "x",
+            "-ibck",
+            "-y",
+            str(hq),
+            str(pasta_temp)
+        ]
+
+        subprocess.run(
+            comando,
+            stdout=subprocess.DEVNULL,
+            stderr=subprocess.DEVNULL
+        )
+
+        imagens = []
+
+        for arquivo in pasta_temp.rglob("*"):
+
+            if arquivo.suffix.lower() in (
+                ".jpg",
+                ".jpeg",
+                ".png",
+                ".webp"
+            ):
+
+                imagens.append(arquivo)
+
+        return len(imagens)
+
+    return 0

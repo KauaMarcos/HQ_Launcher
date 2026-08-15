@@ -3,11 +3,8 @@ import zipfile
 import rarfile
 from io import BytesIO
 from PIL import Image, ImageTk
-from biblioteca import carregar_hqs, pegar_capa
+from biblioteca import carregar_hqs, pegar_capa, contar_paginas
 from Launcher import abrir_hq
-
-
-### CORES DA INTERFACE ###
 
 COR_DO_FUNDO = "#101014"
 COR_DO_PAINEL = "#18181f"
@@ -32,7 +29,7 @@ def carregar_hq_interface(lista_hqs, hqs):
 
 
 # Foi criado para Selecionar as hqs na interface
-def selecionar_hq(lista_hqs, hqs, texto_selecao, capa_hq):
+def selecionar_hq(lista_hqs, hqs, texto_selecao, capa_hq, pag_hq):
 
     selecao = lista_hqs.curselection()
 
@@ -47,28 +44,38 @@ def selecionar_hq(lista_hqs, hqs, texto_selecao, capa_hq):
             text=f"HQ selecionada:\n\n{hq.name}"
         )
 
+        # Conta a quantidade de páginas da HQ
+        paginas = contar_paginas(hq)
+
+        pag_hq.config(
+            text=f"📄 Página Atual: 0\n📄 Total de Páginas: {paginas}"
+        )
+
         dados_capa = pegar_capa(hq)
 
         if dados_capa:
+
             # Converte os dados da capa em uma imagem
             imagem = Image.open(BytesIO(dados_capa))
 
-    # Redimensiona a capa para caber no painel
+            # Redimensiona a capa para caber no painel
             imagem.thumbnail((220, 300))
 
-    # Converte a imagem para o formato usado pelo Tkinter
+            # Converte a imagem para o formato usado pelo Tkinter
             capa_tk = ImageTk.PhotoImage(imagem)
 
-    # Mostra a capa no Label
+            # Mostra a capa no Label
             capa_hq.config(image=capa_tk)
 
-    # Mantém a imagem na memória
+            # Mantém a imagem na memória
             capa_hq.image = capa_tk
 
             print("Capa carregada com sucesso!\n")
+
         else:
 
             print("Capa não encontrada!")
+
 
 # Foi Criado para abrir a hq selecionada na interface
 def abrir_hq_interface(lista_hqs, hqs):
@@ -238,6 +245,22 @@ def iniciar_interface():
     )
 
 
+    # Informação das páginas da HQ
+    pag_hq = tk.Label(
+        painel_info,
+        text="📄 Página Atual: 0\n",
+        fg=COR_TEXTO,
+        bg=COR_DO_PAINEL,
+        font=("Arial", 11)
+    )
+
+    pag_hq.pack(
+        anchor="w",
+        padx=20,
+        pady=10
+    )
+
+
     # Título da biblioteca de HQs
     titulo_biblioteca = tk.Label(
         painel_biblioteca,
@@ -326,7 +349,8 @@ def iniciar_interface():
             lista_hqs,
             hqs,
             texto_selecao,
-            capa_hq
+            capa_hq,
+            pag_hq
         ),
         bg=COR_DO_FUNDO,
         fg=COR_TEXTO,
@@ -386,7 +410,8 @@ def iniciar_interface():
             lista_hqs,
             hqs,
             texto_selecao,
-            capa_hq
+            capa_hq,
+            pag_hq
         )
     )
 

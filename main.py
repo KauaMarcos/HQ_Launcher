@@ -1,5 +1,4 @@
 from biblioteca import carregar_hqs
-from Launcher import abrir_hq
 from interface import iniciar_interface
 hqs = carregar_hqs()
 
