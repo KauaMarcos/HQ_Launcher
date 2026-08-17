@@ -3,8 +3,9 @@ import zipfile
 import rarfile
 from io import BytesIO
 from PIL import Image, ImageTk
-from biblioteca import carregar_hqs, pegar_capa, contar_paginas
+from biblioteca import carregar_hqs, pegar_capa, contar_paginas, carregar_hqs_marvel, carregar_hqs_dc
 from Launcher import abrir_hq
+
 
 COR_DO_FUNDO = "#101014"
 COR_DO_PAINEL = "#18181f"
@@ -14,16 +15,13 @@ COR_DESTAQUE = "#E63946"
 
 
 # Função de carregar hq dentro da interface,
-# aí pega a função de carregar_hq de biblioteca
-# foi criado uma variável lista_hqs pra colocar dentro da interface
+# recebe uma lista de Hqs e mostra elas na biblioteca
 def carregar_hq_interface(lista_hqs, hqs):
-
-    hqs = carregar_hqs()
 
     # Foi criado para não duplicar as Hqs ao clicar no botão mais de uma vez
     lista_hqs.delete(0, tk.END)
 
-    # Foi criado para inserir cada hq do inicio ao fim da pasta
+    # Foi criado para inserir cada hq do inicio ao fim da lista recebida
     for hq in hqs:
         lista_hqs.insert(tk.END, hq.name)
 
@@ -112,7 +110,6 @@ def iniciar_interface():
 
     janela.resizable(False, False)
 
-
     # Área responsável pelo cabeçalho da interface
     cabeçalho = tk.Frame(
         janela,
@@ -126,7 +123,6 @@ def iniciar_interface():
         pady=(25, 15)
     )
 
-
     # Título principal do programa
     titulo = tk.Label(
         cabeçalho,
@@ -138,7 +134,6 @@ def iniciar_interface():
 
     # Alinha o título à esquerda
     titulo.pack(anchor="w")
-
 
     # Subtítulo do programa
     subtitulo = tk.Label(
@@ -155,7 +150,6 @@ def iniciar_interface():
         pady=(3, 0)
     )
 
-
     # Área onde ficarão os principais elementos do Launcher
     area_principal = tk.Frame(
         janela,
@@ -170,7 +164,6 @@ def iniciar_interface():
         pady=10
     )
 
-
     # Painel onde ficará a lista de HQs
     painel_biblioteca = tk.Frame(
         area_principal,
@@ -184,7 +177,6 @@ def iniciar_interface():
         expand=True
     )
 
-
     # painel onde ficará as informações da HQ selecionada
     painel_info = tk.Frame(
         area_principal,
@@ -197,7 +189,6 @@ def iniciar_interface():
         expand=True,
         padx=(10, 0)
     )
-
 
     # Título do painel de informações
     titulo_informacoes = tk.Label(
@@ -215,7 +206,6 @@ def iniciar_interface():
         pady=(20, 10)
     )
 
-
     # Texto que será mostrado quando nenhuma HQ estiver selecionada
     texto_selecao = tk.Label(
         painel_info,
@@ -232,7 +222,6 @@ def iniciar_interface():
         pady=10
     )
 
-
     # Área onde será mostrada a capa da HQ selecionada
     capa_hq = tk.Label(
         painel_info,
@@ -243,7 +232,6 @@ def iniciar_interface():
     capa_hq.pack(
         pady=10
     )
-
 
     # Informação das páginas da HQ
     pag_hq = tk.Label(
@@ -260,7 +248,6 @@ def iniciar_interface():
         pady=10
     )
 
-
     # Título da biblioteca de HQs
     titulo_biblioteca = tk.Label(
         painel_biblioteca,
@@ -276,7 +263,6 @@ def iniciar_interface():
         padx=20,
         pady=(20, 10)
     )
-
 
     # Componente para Lista de HQs na interface
     lista_hqs = tk.Listbox(
@@ -298,7 +284,6 @@ def iniciar_interface():
         pady=(0, 15)
     )
 
-
     # Área responsável por organizar os botões
     painel_botoes = tk.Frame(
         painel_biblioteca,
@@ -312,6 +297,54 @@ def iniciar_interface():
         pady=(0, 20)
     )
 
+    # Carrega as HQs usando a função carregar_hqs
+    hqs = carregar_hqs()
+
+    # Carrega somente as HQs da Marvel
+    hqs_marvel = carregar_hqs_marvel()
+
+    # Carrega somente as HQs da DC
+    hqs_dc = carregar_hqs_dc()
+
+    # Guarda a lista de Hqs que está sendo mostrada atualmente
+    hqs_atual = hqs
+
+
+    # Função para carregar todas as HQs
+    def carregar_todas():
+
+        nonlocal hqs_atual
+
+        hqs_atual = hqs
+
+        carregar_hq_interface(
+            lista_hqs,
+            hqs_atual
+        )
+
+    # Função para carregar somente as HQs da Marvel
+    def carregar_marvel():
+
+        nonlocal hqs_atual
+
+        hqs_atual = hqs_marvel
+
+        carregar_hq_interface(
+            lista_hqs,
+            hqs_atual
+        )
+
+    # Função para carregar somente as HQs da DC
+    def carregar_dc():
+
+        nonlocal hqs_atual
+
+        hqs_atual = hqs_dc
+
+        carregar_hq_interface(
+            lista_hqs,
+            hqs_atual
+        )
 
     # Botão para Carregar HQ,
     # command=lambda: dar um comando para chamar a função carregar_hq_interface
@@ -319,7 +352,7 @@ def iniciar_interface():
     button = tk.Button(
         painel_botoes,
         text="CARREGAR HQS",
-        command=lambda: carregar_hq_interface(lista_hqs, hqs),
+        command=carregar_todas,
         bg=COR_DESTAQUE,
         fg=COR_TEXTO,
         activebackground=COR_DESTAQUE,
@@ -338,7 +371,6 @@ def iniciar_interface():
         ipady=8
     )
 
-
     # Botão para Selencionar HQ,
     # command=lambda: dar um comando para chamar a função selecionar_hq
     # e mostrar as hqs com lista_hqs
@@ -347,7 +379,7 @@ def iniciar_interface():
         text="VER SELEÇÃO",
         command=lambda: selecionar_hq(
             lista_hqs,
-            hqs,
+            hqs_atual,
             texto_selecao,
             capa_hq,
             pag_hq
@@ -370,7 +402,6 @@ def iniciar_interface():
         ipady=8
     )
 
-
     # Botão para Abrir HQ,
     # command=lambda: dar um comando para chamar a função abrir_hq_interface
     button_open_hq = tk.Button(
@@ -378,7 +409,7 @@ def iniciar_interface():
         text="ABRIR HQ",
         command=lambda: abrir_hq_interface(
             lista_hqs,
-            hqs
+            hqs_atual
         ),
         bg=COR_DO_FUNDO,
         fg=COR_TEXTO,
@@ -398,23 +429,63 @@ def iniciar_interface():
         ipady=8
     )
 
+    # Botão para carregar somente as HQs da Marvel
+    button_marvel = tk.Button(
+        painel_botoes,
+        text="MARVEL",
+        command=carregar_marvel,
+        bg=COR_DO_FUNDO,
+        fg=COR_TEXTO,
+        activebackground=COR_DESTAQUE,
+        activeforeground=COR_TEXTO,
+        relief="flat",
+        font=("Arial", 10, "bold"),
+        cursor="hand2"
+    )
 
-    # Carrega as HQs usando a função carregar_hqs
-    hqs = carregar_hqs()
+    # Posiciona o botão da Marvel
+    button_marvel.pack(
+        side="left",
+        expand=True,
+        fill="x",
+        padx=(5, 0),
+        ipady=8
+    )
 
+    # Botão para carregar somente as HQs da DC
+    button_dc = tk.Button(
+        painel_botoes,
+        text="DC",
+        command=carregar_dc,
+        bg=COR_DO_FUNDO,
+        fg=COR_TEXTO,
+        activebackground=COR_DESTAQUE,
+        activeforeground=COR_TEXTO,
+        relief="flat",
+        font=("Arial", 10, "bold"),
+        cursor="hand2"
+    )
+
+    # Posiciona o botão da DC
+    button_dc.pack(
+        side="left",
+        expand=True,
+        fill="x",
+        padx=(5, 0),
+        ipady=8
+    )
 
     # Evento responsável por detectar quando uma HQ é selecionada
     lista_hqs.bind(
         "<<ListboxSelect>>",
         lambda evento: selecionar_hq(
             lista_hqs,
-            hqs,
+            hqs_atual,
             texto_selecao,
             capa_hq,
             pag_hq
         )
     )
-
 
     # Loop da interface, ao fechar será cancelado o loop
     janela.mainloop()

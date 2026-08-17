@@ -1,9 +1,10 @@
 from pathlib import Path
-from config import caminho_hqs
+from config import caminho_hqs, caminho_hqs_marvel, caminho_hqs_dc
 import zipfile
 import rarfile
 import subprocess
 import tempfile
+import shutil
 
 rarfile.UNRAR_TOOL = r"C:\Program Files\WinRAR\WinRAR.exe"
 
@@ -26,7 +27,35 @@ def carregar_hqs():
 
     return hqs
 
+def carregar_hqs_marvel():
 
+    hqs_marvel = []
+
+    if not caminho_hqs_marvel.exists():
+
+        return hqs_marvel
+
+    for arquivo in caminho_hqs_marvel.rglob("*"):
+
+        if arquivo.suffix.lower() in (".cbr", ".cbz"):
+            hqs_marvel.append(arquivo)
+ 
+    return hqs_marvel
+
+def carregar_hqs_dc():
+
+    hqs_dc = []
+
+    if not caminho_hqs_dc.exists():
+
+        return hqs_dc
+
+    for arquivo in caminho_hqs_dc.rglob("*"):
+
+        if arquivo.suffix.lower() in (".cbr", ".cbz"):
+            hqs_dc.append(arquivo)
+    
+    return hqs_dc
 # Função responsável por encontrar a capa da HQ
 def pegar_capa(hq):
 
@@ -57,41 +86,56 @@ def pegar_capa(hq):
             tempfile.mkdtemp()
         )
 
-        # Comando que será executado pelo WinRAR
-        comando = [
-            winrar,
-            "x",
-            "-ibck",
-            "-y",
-            str(hq),
-            str(pasta_temp)
-        ]
+        try:
 
-        # Executa o WinRAR
-        subprocess.run(
-            comando,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
+            # Comando que será executado pelo WinRAR
+            comando = [
+                winrar,
+                "x",
+                "-ibck",
+                "-y",
+                str(hq),
+                str(pasta_temp)
+            ]
 
-        # Procura as imagens extraídas
-        imagens = []
+            # Executa o WinRAR
+            subprocess.run(
+                comando,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
 
-        for arquivo in pasta_temp.rglob("*"):
+            # Procura as imagens extraídas
+            imagens = []
 
-            if arquivo.suffix.lower() in (
-                ".jpg",
-                ".jpeg",
-                ".png",
-                ".webp"
-            ):
+            for arquivo in pasta_temp.rglob("*"):
 
-                imagens.append(arquivo)
+                if arquivo.suffix.lower() in (
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".webp"
+                ):
 
-        # Se encontrou alguma imagem
-        if imagens:
+                    imagens.append(arquivo)
 
-            return imagens[0].read_bytes()
+            # Se encontrou alguma imagem
+            if imagens:
+
+                # Lê a capa antes de apagar a pasta temporária
+                capa = imagens[0].read_bytes()
+
+                return capa
+
+            return None
+
+        finally:
+
+            # Apaga a pasta temporária e todos os arquivos extraídos
+            shutil.rmtree(
+                pasta_temp,
+                ignore_errors=True
+            )
 
 
     return None
@@ -118,40 +162,58 @@ def contar_paginas(hq):
     # Verifica se a HQ é CBR
     elif hq.suffix.lower() == ".cbr":
 
+        # Caminho do WinRAR
         winrar = r"C:\Program Files\WinRAR\WinRAR.exe"
 
+        # Cria uma pasta temporária
         pasta_temp = Path(
             tempfile.mkdtemp()
         )
 
-        comando = [
-            winrar,
-            "x",
-            "-ibck",
-            "-y",
-            str(hq),
-            str(pasta_temp)
-        ]
+        try:
 
-        subprocess.run(
-            comando,
-            stdout=subprocess.DEVNULL,
-            stderr=subprocess.DEVNULL
-        )
+            # Comando que será executado pelo WinRAR
+            comando = [
+                winrar,
+                "x",
+                "-ibck",
+                "-y",
+                str(hq),
+                str(pasta_temp)
+            ]
 
-        imagens = []
+            # Executa o WinRAR
+            subprocess.run(
+                comando,
+                stdout=subprocess.DEVNULL,
+                stderr=subprocess.DEVNULL
+            )
 
-        for arquivo in pasta_temp.rglob("*"):
+            # Procura as imagens extraídas
+            imagens = []
 
-            if arquivo.suffix.lower() in (
-                ".jpg",
-                ".jpeg",
-                ".png",
-                ".webp"
-            ):
+            for arquivo in pasta_temp.rglob("*"):
 
-                imagens.append(arquivo)
+                if arquivo.suffix.lower() in (
+                    ".jpg",
+                    ".jpeg",
+                    ".png",
+                    ".webp"
+                ):
 
-        return len(imagens)
+                    imagens.append(arquivo)
+
+            # Conta a quantidade de páginas
+            quantidade_paginas = len(imagens)
+
+            return quantidade_paginas
+
+        finally:
+
+            # Apaga a pasta temporária e todos os arquivos extraídos
+            shutil.rmtree(
+                pasta_temp,
+                ignore_errors=True
+            )
 
     return 0
