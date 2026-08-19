@@ -226,7 +226,40 @@ def listar_hqs(estrutura, personagem):
 
     return hqs
 
+def listar_edicoes(estrutura, personagem, nome_hq):
 
+    if personagem not in estrutura:
+        return []
+
+    if nome_hq not in estrutura[personagem]:
+        return []
+
+    return estrutura[personagem][nome_hq]["edicoes"]
+
+def listar_subpastas(estrutura, personagem, nome_hq):
+
+    if personagem not in estrutura:
+        return {}
+
+    if nome_hq not in estrutura[personagem]:
+        return {}
+
+    return estrutura[personagem][nome_hq]["subpastas"]
+
+def listar_hqs_subpasta(estrutura, personagem, nome_hq, nome_subpasta):
+
+    if personagem not in estrutura:
+        return []
+
+    if nome_hq not in estrutura[personagem]:
+        return []
+
+    subpastas = estrutura[personagem][nome_hq]["subpastas"]
+
+    if nome_subpasta not in subpastas:
+        return []
+
+    return subpastas[nome_subpasta]
 # Função responsável por contar as páginas da HQ
 def contar_paginas(hq):
 
@@ -297,73 +330,3 @@ def contar_paginas(hq):
 
     return 0
 
-
-# ==========================================================
-# TESTES
-# ==========================================================
-
-biblioteca = organizar_biblioteca(
-    caminho_hqs_marvel
-)
-
-
-# Teste 1 — Mostrar a estrutura completa da biblioteca
-
-for personagem, hqs in biblioteca.items():
-
-    print(f"\n{personagem}")
-
-    for nome_hq, conteudo in hqs.items():
-
-        print(f"  └── {nome_hq}")
-
-        print("      Edições:")
-
-        for edicao in conteudo["edicoes"]:
-
-            print(f"          └── {edicao.name}")
-
-        if conteudo["subpastas"]:
-
-            print("      Subpastas:")
-
-            for nome_subpasta, arquivos in conteudo["subpastas"].items():
-
-                print(f"          └── {nome_subpasta}")
-
-                for arquivo in arquivos:
-
-                    print(
-                        f"              └── {arquivo.name}"
-                    )
-
-
-# Teste 2 — Listar personagens/equipes
-
-personagens = listar_personagens(
-    biblioteca
-)
-
-print("\nPERSONAGENS/EQUIPES:")
-
-for personagem in personagens:
-
-    print(f"- {personagem}")
-
-
-# Teste 3 — Listar HQs de cada personagem/equipe
-
-print("\nHQs POR PERSONAGEM:")
-
-for personagem in personagens:
-
-    hqs = listar_hqs(
-        biblioteca,
-        personagem
-    )
-
-    print(f"\n{personagem}:")
-
-    for hq in hqs:
-
-        print(f"  └── {hq}")

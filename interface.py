@@ -3,9 +3,19 @@ import zipfile
 import rarfile
 from io import BytesIO
 from PIL import Image, ImageTk
-from biblioteca import carregar_hqs, pegar_capa, contar_paginas, carregar_hqs_marvel, carregar_hqs_dc
+from biblioteca import (
+    carregar_hqs,
+    pegar_capa,
+    contar_paginas,
+    carregar_hqs_marvel,
+    carregar_hqs_dc,
+    organizar_biblioteca,
+    listar_personagens
+)
+from config import caminho_hqs_marvel, caminho_hqs_dc
 from Launcher import abrir_hq
 import customtkinter as ctk
+
 
 COR_DO_FUNDO = "#101014"
 COR_DO_PAINEL = "#18181f"
@@ -296,23 +306,28 @@ def iniciar_interface():
         padx=20,
         pady=(0, 20)
     )
+
     painel_filtros = tk.Frame(
-            painel_botoes,
-            bg=COR_DO_PAINEL
-        )
-    painel_filtros.pack(
-            side="left",
-            expand=True,
-            fill="x"
-        )
-    painel_acao = tk.Frame(
-            painel_botoes,
-            bg=COR_DO_PAINEL
-        )
-    painel_acao.pack(
-            side="right",
-            padx=(10,0)
+        painel_botoes,
+        bg=COR_DO_PAINEL
     )
+
+    painel_filtros.pack(
+        side="left",
+        expand=True,
+        fill="x"
+    )
+
+    painel_acao = tk.Frame(
+        painel_botoes,
+        bg=COR_DO_PAINEL
+    )
+
+    painel_acao.pack(
+        side="right",
+        padx=(10, 0)
+    )
+
     # Carrega as HQs usando a função carregar_hqs
     hqs = carregar_hqs()
 
@@ -322,14 +337,29 @@ def iniciar_interface():
     # Carrega somente as HQs da DC
     hqs_dc = carregar_hqs_dc()
 
+    # Organiza a biblioteca da Marvel
+    biblioteca_marvel = organizar_biblioteca(
+        caminho_hqs_marvel
+    )
+
+    # Organiza a biblioteca da DC
+    biblioteca_dc = organizar_biblioteca(
+        caminho_hqs_dc
+    )
+
     # Guarda a lista de Hqs que está sendo mostrada atualmente
     hqs_atual = hqs
 
+    # Guarda o nível atual da biblioteca
+    nivel_atual = "hqs"
 
     # Função para carregar todas as HQs
     def carregar_todas():
 
         nonlocal hqs_atual
+        nonlocal nivel_atual
+
+        nivel_atual = "hqs"
 
         hqs_atual = hqs
 
@@ -338,28 +368,41 @@ def iniciar_interface():
             hqs_atual
         )
 
+    # Função para mostrar os personagens e equipes
+    def mostrar_personagens(biblioteca):
+
+        nonlocal nivel_atual
+
+        nivel_atual = "personagens"
+
+        personagens = listar_personagens(
+            biblioteca
+        )
+
+        lista_hqs.delete(
+            0,
+            tk.END
+        )
+
+        for personagem in personagens:
+
+            lista_hqs.insert(
+                tk.END,
+                personagem
+            )
+
     # Função para carregar somente as HQs da Marvel
     def carregar_marvel():
 
-        nonlocal hqs_atual
-
-        hqs_atual = hqs_marvel
-
-        carregar_hq_interface(
-            lista_hqs,
-            hqs_atual
+        mostrar_personagens(
+            biblioteca_marvel
         )
 
     # Função para carregar somente as HQs da DC
     def carregar_dc():
 
-        nonlocal hqs_atual
-
-        hqs_atual = hqs_dc
-
-        carregar_hq_interface(
-            lista_hqs,
-            hqs_atual
+        mostrar_personagens(
+            biblioteca_dc
         )
 
     # Botão para Carregar HQ,
@@ -389,12 +432,12 @@ def iniciar_interface():
     # Botão para Abrir HQ,
     # command=lambda: dar um comando para chamar a função abrir_hq_interface
     button_open_hq = ctk.CTkButton(
-        painel_botoes,
+        painel_acao,
         text="ABRIR HQ",
         command=lambda: abrir_hq_interface(
             lista_hqs,
             hqs_atual
-    ),
+        ),
         fg_color="#FFFFFF",
         hover_color="#D9D9D9",
         text_color="#101014",
@@ -403,25 +446,26 @@ def iniciar_interface():
         height=40,
         cursor="hand2"
     )
+
     # Posiciona o Botão de Abrir Hqs dentro do Frame
     button_open_hq.pack(
-        side='left',
+        side="left",
         expand=True,
         fill="x",
-        padx=(10,0)
-        )
-    
+        padx=(10, 0)
+    )
+
     # Botão para carregar somente as HQs da Marvel
     button_marvel = ctk.CTkButton(
-         painel_filtros,
-         text="MARVEL",
-         command=carregar_marvel,
-         fg_color="#E62429",
-         hover_color="#EB7C7C",
-         text_color="#FFFFFF",
-         corner_radius=8,
-         font=("Helvetica", 11, "bold"),
-         cursor="hand2"
+        painel_filtros,
+        text="MARVEL",
+        command=carregar_marvel,
+        fg_color="#E62429",
+        hover_color="#EB7C7C",
+        text_color="#FFFFFF",
+        corner_radius=8,
+        font=("Helvetica", 11, "bold"),
+        cursor="hand2"
     )
 
     # Posiciona o botão da Marvel
@@ -435,15 +479,15 @@ def iniciar_interface():
 
     # Botão para carregar somente as HQs da DC
     button_dc = ctk.CTkButton(
-           painel_filtros,
-           text="DC",
-           command=carregar_dc,
-           fg_color="#0B1F3A",
-           hover_color="#163A63",
-           text_color="#FFD700",
-           corner_radius=8,
-           font=("Helvetica", 11, "bold"),
-           cursor="hand2"
+        painel_filtros,
+        text="DC",
+        command=carregar_dc,
+        fg_color="#0B1F3A",
+        hover_color="#163A63",
+        text_color="#FFD700",
+        corner_radius=8,
+        font=("Helvetica", 11, "bold"),
+        cursor="hand2"
     )
 
     # Posiciona o botão da DC
@@ -458,12 +502,16 @@ def iniciar_interface():
     # Evento responsável por detectar quando uma HQ é selecionada
     lista_hqs.bind(
         "<<ListboxSelect>>",
-        lambda evento: selecionar_hq(
-            lista_hqs,
-            hqs_atual,
-            texto_selecao,
-            capa_hq,
-            pag_hq
+        lambda evento: (
+            selecionar_hq(
+                lista_hqs,
+                hqs_atual,
+                texto_selecao,
+                capa_hq,
+                pag_hq
+            )
+            if nivel_atual == "hqs"
+            else None
         )
     )
 
