@@ -5,7 +5,7 @@ from io import BytesIO
 from PIL import Image, ImageTk
 from biblioteca import carregar_hqs, pegar_capa, contar_paginas, carregar_hqs_marvel, carregar_hqs_dc
 from Launcher import abrir_hq
-
+import customtkinter as ctk
 
 COR_DO_FUNDO = "#101014"
 COR_DO_PAINEL = "#18181f"
@@ -296,7 +296,23 @@ def iniciar_interface():
         padx=20,
         pady=(0, 20)
     )
-
+    painel_filtros = tk.Frame(
+            painel_botoes,
+            bg=COR_DO_PAINEL
+        )
+    painel_filtros.pack(
+            side="left",
+            expand=True,
+            fill="x"
+        )
+    painel_acao = tk.Frame(
+            painel_botoes,
+            bg=COR_DO_PAINEL
+        )
+    painel_acao.pack(
+            side="right",
+            padx=(10,0)
+    )
     # Carrega as HQs usando a função carregar_hqs
     hqs = carregar_hqs()
 
@@ -349,15 +365,14 @@ def iniciar_interface():
     # Botão para Carregar HQ,
     # command=lambda: dar um comando para chamar a função carregar_hq_interface
     # e mostrar as hqs com lista_hqs
-    button = tk.Button(
-        painel_botoes,
-        text="CARREGAR HQS",
+    button = ctk.CTkButton(
+        painel_filtros,
+        text="TODAS HQS",
         command=carregar_todas,
-        bg=COR_DESTAQUE,
-        fg=COR_TEXTO,
-        activebackground=COR_DESTAQUE,
-        activeforeground=COR_TEXTO,
-        relief="flat",
+        fg_color="#2A2A32",
+        hover_color="#3A3A45",
+        text_color="#FFFFFF",
+        corner_radius=10,
         font=("Arial", 10, "bold"),
         cursor="hand2"
     )
@@ -371,76 +386,42 @@ def iniciar_interface():
         ipady=8
     )
 
-    # Botão para Selencionar HQ,
-    # command=lambda: dar um comando para chamar a função selecionar_hq
-    # e mostrar as hqs com lista_hqs
-    button_selecion = tk.Button(
-        painel_botoes,
-        text="VER SELEÇÃO",
-        command=lambda: selecionar_hq(
-            lista_hqs,
-            hqs_atual,
-            texto_selecao,
-            capa_hq,
-            pag_hq
-        ),
-        bg=COR_DO_FUNDO,
-        fg=COR_TEXTO,
-        activebackground=COR_DESTAQUE,
-        activeforeground=COR_TEXTO,
-        relief="flat",
-        font=("Arial", 10),
-        cursor="hand2"
-    )
-
-    # Posiciona o Botão de Selecionar Hqs dentro do Frame
-    button_selecion.pack(
-        side="left",
-        expand=True,
-        fill="x",
-        padx=5,
-        ipady=8
-    )
-
     # Botão para Abrir HQ,
     # command=lambda: dar um comando para chamar a função abrir_hq_interface
-    button_open_hq = tk.Button(
+    button_open_hq = ctk.CTkButton(
         painel_botoes,
         text="ABRIR HQ",
         command=lambda: abrir_hq_interface(
             lista_hqs,
             hqs_atual
-        ),
-        bg=COR_DO_FUNDO,
-        fg=COR_TEXTO,
-        activebackground=COR_DESTAQUE,
-        activeforeground=COR_TEXTO,
-        relief="flat",
-        font=("Arial", 10, "bold"),
+    ),
+        fg_color="#FFFFFF",
+        hover_color="#D9D9D9",
+        text_color="#101014",
+        corner_radius=10,
+        font=("Arial", 11, "bold"),
+        height=40,
         cursor="hand2"
     )
-
     # Posiciona o Botão de Abrir Hqs dentro do Frame
     button_open_hq.pack(
-        side="left",
+        side='left',
         expand=True,
         fill="x",
-        padx=(5, 0),
-        ipady=8
-    )
-
+        padx=(10,0)
+        )
+    
     # Botão para carregar somente as HQs da Marvel
-    button_marvel = tk.Button(
-        painel_botoes,
-        text="MARVEL",
-        command=carregar_marvel,
-        bg=COR_DO_FUNDO,
-        fg=COR_TEXTO,
-        activebackground=COR_DESTAQUE,
-        activeforeground=COR_TEXTO,
-        relief="flat",
-        font=("Arial", 10, "bold"),
-        cursor="hand2"
+    button_marvel = ctk.CTkButton(
+         painel_filtros,
+         text="MARVEL",
+         command=carregar_marvel,
+         fg_color="#E62429",
+         hover_color="#EB7C7C",
+         text_color="#FFFFFF",
+         corner_radius=8,
+         font=("Helvetica", 11, "bold"),
+         cursor="hand2"
     )
 
     # Posiciona o botão da Marvel
@@ -448,22 +429,21 @@ def iniciar_interface():
         side="left",
         expand=True,
         fill="x",
-        padx=(5, 0),
+        padx=(5, 5),
         ipady=8
     )
 
     # Botão para carregar somente as HQs da DC
-    button_dc = tk.Button(
-        painel_botoes,
-        text="DC",
-        command=carregar_dc,
-        bg=COR_DO_FUNDO,
-        fg=COR_TEXTO,
-        activebackground=COR_DESTAQUE,
-        activeforeground=COR_TEXTO,
-        relief="flat",
-        font=("Arial", 10, "bold"),
-        cursor="hand2"
+    button_dc = ctk.CTkButton(
+           painel_filtros,
+           text="DC",
+           command=carregar_dc,
+           fg_color="#0B1F3A",
+           hover_color="#163A63",
+           text_color="#FFD700",
+           corner_radius=8,
+           font=("Helvetica", 11, "bold"),
+           cursor="hand2"
     )
 
     # Posiciona o botão da DC
@@ -471,7 +451,7 @@ def iniciar_interface():
         side="left",
         expand=True,
         fill="x",
-        padx=(5, 0),
+        padx=(5, 5),
         ipady=8
     )
 

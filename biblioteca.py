@@ -6,11 +6,11 @@ import subprocess
 import tempfile
 import shutil
 
+
 rarfile.UNRAR_TOOL = r"C:\Program Files\WinRAR\WinRAR.exe"
 
 
-# Função para carregar as Hq's, pega o caminho_hqs de config.py,
-# e faz uma lista das Hq's, adicionando extensões .cbr e .cbz
+# Função para carregar as HQs da biblioteca geral
 def carregar_hqs():
 
     biblioteca = Path(caminho_hqs)
@@ -27,35 +27,39 @@ def carregar_hqs():
 
     return hqs
 
+
+# Função para carregar as HQs da Marvel
 def carregar_hqs_marvel():
 
     hqs_marvel = []
 
     if not caminho_hqs_marvel.exists():
-
         return hqs_marvel
 
     for arquivo in caminho_hqs_marvel.rglob("*"):
 
         if arquivo.suffix.lower() in (".cbr", ".cbz"):
             hqs_marvel.append(arquivo)
- 
+
     return hqs_marvel
 
+
+# Função para carregar as HQs da DC
 def carregar_hqs_dc():
 
     hqs_dc = []
 
     if not caminho_hqs_dc.exists():
-
         return hqs_dc
 
     for arquivo in caminho_hqs_dc.rglob("*"):
 
         if arquivo.suffix.lower() in (".cbr", ".cbz"):
             hqs_dc.append(arquivo)
-    
+
     return hqs_dc
+
+
 # Função responsável por encontrar a capa da HQ
 def pegar_capa(hq):
 
@@ -78,17 +82,14 @@ def pegar_capa(hq):
     # Verifica se a HQ é CBR
     elif hq.suffix.lower() == ".cbr":
 
-        # Caminho do WinRAR
         winrar = r"C:\Program Files\WinRAR\WinRAR.exe"
 
-        # Cria uma pasta temporária
         pasta_temp = Path(
             tempfile.mkdtemp()
         )
 
         try:
 
-            # Comando que será executado pelo WinRAR
             comando = [
                 winrar,
                 "x",
@@ -98,14 +99,12 @@ def pegar_capa(hq):
                 str(pasta_temp)
             ]
 
-            # Executa o WinRAR
             subprocess.run(
                 comando,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
             )
 
-            # Procura as imagens extraídas
             imagens = []
 
             for arquivo in pasta_temp.rglob("*"):
@@ -119,10 +118,8 @@ def pegar_capa(hq):
 
                     imagens.append(arquivo)
 
-            # Se encontrou alguma imagem
             if imagens:
 
-                # Lê a capa antes de apagar a pasta temporária
                 capa = imagens[0].read_bytes()
 
                 return capa
@@ -131,14 +128,103 @@ def pegar_capa(hq):
 
         finally:
 
-            # Apaga a pasta temporária e todos os arquivos extraídos
             shutil.rmtree(
                 pasta_temp,
                 ignore_errors=True
             )
 
-
     return None
+
+
+# Função responsável por organizar a biblioteca
+def organizar_biblioteca(caminho_hqs):
+
+    biblioteca = Path(caminho_hqs)
+
+    estrutura = {}
+
+    if not biblioteca.exists():
+        return estrutura
+
+    for personagem in biblioteca.iterdir():
+
+        if not personagem.is_dir():
+            continue
+
+        estrutura[personagem.name] = {}
+
+        for hq in personagem.iterdir():
+
+            if not hq.is_dir():
+                continue
+
+            edicoes = []
+            subpastas = {}
+
+            for arquivo in hq.iterdir():
+
+                # Edição diretamente dentro da pasta da HQ
+                if (
+                    arquivo.is_file()
+                    and arquivo.suffix.lower() in (".cbr", ".cbz")
+                ):
+
+                    edicoes.append(arquivo)
+
+                # Subpasta opcional
+                elif arquivo.is_dir():
+
+                    arquivos_subpasta = []
+
+                    for arquivo_subpasta in arquivo.rglob("*"):
+
+                        if (
+                            arquivo_subpasta.is_file()
+                            and arquivo_subpasta.suffix.lower()
+                            in (".cbr", ".cbz")
+                        ):
+
+                            arquivos_subpasta.append(
+                                arquivo_subpasta
+                            )
+
+                    if arquivos_subpasta:
+
+                        subpastas[arquivo.name] = arquivos_subpasta
+
+            estrutura[personagem.name][hq.name] = {
+                "edicoes": edicoes,
+                "subpastas": subpastas
+            }
+
+    return estrutura
+
+
+# Função responsável por listar personagens/equipes
+def listar_personagens(estrutura):
+
+    personagens = []
+
+    for personagem in estrutura:
+
+        personagens.append(personagem)
+
+    return personagens
+
+
+# Função responsável por listar as HQs de um personagem/equipe
+def listar_hqs(estrutura, personagem):
+
+    if personagem not in estrutura:
+        return []
+
+    hqs = []
+
+    for hq in estrutura[personagem]:
+
+        hqs.append(hq)
+
+    return hqs
 
 
 # Função responsável por contar as páginas da HQ
@@ -162,17 +248,14 @@ def contar_paginas(hq):
     # Verifica se a HQ é CBR
     elif hq.suffix.lower() == ".cbr":
 
-        # Caminho do WinRAR
         winrar = r"C:\Program Files\WinRAR\WinRAR.exe"
 
-        # Cria uma pasta temporária
         pasta_temp = Path(
             tempfile.mkdtemp()
         )
 
         try:
 
-            # Comando que será executado pelo WinRAR
             comando = [
                 winrar,
                 "x",
@@ -182,14 +265,12 @@ def contar_paginas(hq):
                 str(pasta_temp)
             ]
 
-            # Executa o WinRAR
             subprocess.run(
                 comando,
                 stdout=subprocess.DEVNULL,
                 stderr=subprocess.DEVNULL
             )
 
-            # Procura as imagens extraídas
             imagens = []
 
             for arquivo in pasta_temp.rglob("*"):
@@ -203,17 +284,86 @@ def contar_paginas(hq):
 
                     imagens.append(arquivo)
 
-            # Conta a quantidade de páginas
             quantidade_paginas = len(imagens)
 
             return quantidade_paginas
 
         finally:
 
-            # Apaga a pasta temporária e todos os arquivos extraídos
             shutil.rmtree(
                 pasta_temp,
                 ignore_errors=True
             )
 
     return 0
+
+
+# ==========================================================
+# TESTES
+# ==========================================================
+
+biblioteca = organizar_biblioteca(
+    caminho_hqs_marvel
+)
+
+
+# Teste 1 — Mostrar a estrutura completa da biblioteca
+
+for personagem, hqs in biblioteca.items():
+
+    print(f"\n{personagem}")
+
+    for nome_hq, conteudo in hqs.items():
+
+        print(f"  └── {nome_hq}")
+
+        print("      Edições:")
+
+        for edicao in conteudo["edicoes"]:
+
+            print(f"          └── {edicao.name}")
+
+        if conteudo["subpastas"]:
+
+            print("      Subpastas:")
+
+            for nome_subpasta, arquivos in conteudo["subpastas"].items():
+
+                print(f"          └── {nome_subpasta}")
+
+                for arquivo in arquivos:
+
+                    print(
+                        f"              └── {arquivo.name}"
+                    )
+
+
+# Teste 2 — Listar personagens/equipes
+
+personagens = listar_personagens(
+    biblioteca
+)
+
+print("\nPERSONAGENS/EQUIPES:")
+
+for personagem in personagens:
+
+    print(f"- {personagem}")
+
+
+# Teste 3 — Listar HQs de cada personagem/equipe
+
+print("\nHQs POR PERSONAGEM:")
+
+for personagem in personagens:
+
+    hqs = listar_hqs(
+        biblioteca,
+        personagem
+    )
+
+    print(f"\n{personagem}:")
+
+    for hq in hqs:
+
+        print(f"  └── {hq}")
