@@ -10,7 +10,11 @@ from biblioteca import (
     carregar_hqs_marvel,
     carregar_hqs_dc,
     organizar_biblioteca,
-    listar_personagens
+    listar_personagens,
+    listar_hqs,
+    listar_edicoes,
+    listar_subpastas,
+    listar_hqs_subpasta
 )
 from config import caminho_hqs_marvel, caminho_hqs_dc
 from Launcher import abrir_hq
@@ -56,7 +60,7 @@ def selecionar_hq(lista_hqs, hqs, texto_selecao, capa_hq, pag_hq):
         paginas = contar_paginas(hq)
 
         pag_hq.config(
-            text=f"📄 Página Atual: 0\n📄 Total de Páginas: {paginas}"
+            text=f"📄 {paginas} páginas"
         )
 
         dados_capa = pegar_capa(hq)
@@ -113,12 +117,12 @@ def iniciar_interface():
     janela.title("HQ Launcher")
 
     # Tamanho Da Janela
-    janela.geometry("1000x650")
+    janela.geometry("1440x900")
 
     # Cor de Fundo da Janela
     janela.configure(bg=COR_DO_FUNDO)
 
-    janela.resizable(False, False)
+    janela.resizable(True, True)
 
     # Área responsável pelo cabeçalho da interface
     cabeçalho = tk.Frame(
@@ -151,7 +155,7 @@ def iniciar_interface():
         text="Minha Biblioteca de HQs",
         fg=COR_TEXTO_SECUNDARIO,
         bg=COR_DO_FUNDO,
-        font=("Arial", 11)
+        font=("Arial", 14)
     )
 
     # Posiciona o subtítulo abaixo do título
@@ -190,15 +194,18 @@ def iniciar_interface():
     # painel onde ficará as informações da HQ selecionada
     painel_info = tk.Frame(
         area_principal,
-        bg=COR_DO_PAINEL
+        bg=COR_DO_PAINEL,
+        width=350
     )
 
     painel_info.pack(
         side="right",
         fill="both",
         expand=True,
-        padx=(10, 0)
+        padx=(10, 10)
     )
+
+    painel_info.pack_propagate(False)
 
     # Título do painel de informações
     titulo_informacoes = tk.Label(
@@ -206,14 +213,14 @@ def iniciar_interface():
         text="📖 Informações",
         fg=COR_TEXTO,
         bg=COR_DO_PAINEL,
-        font=("Arial", 14, "bold")
+        font=("Arial", 12, "bold")
     )
 
     # Posiciona o título dentro do painel
     titulo_informacoes.pack(
         anchor="w",
         padx=20,
-        pady=(20, 10)
+        pady=(10, 0)
     )
 
     # Texto que será mostrado quando nenhuma HQ estiver selecionada
@@ -222,13 +229,13 @@ def iniciar_interface():
         text="Nenhuma HQ selecionada",
         fg=COR_TEXTO_SECUNDARIO,
         bg=COR_DO_PAINEL,
-        font=("Arial", 11)
+        font=('Arial', 12, "bold")
     )
 
     # Posiciona o texto dentro do painel
     texto_selecao.pack(
         anchor="w",
-        padx=20,
+        padx=10,
         pady=10
     )
 
@@ -240,16 +247,15 @@ def iniciar_interface():
 
     # Posiciona a capa dentro do painel
     capa_hq.pack(
-        pady=10
+        pady=13
     )
 
     # Informação das páginas da HQ
     pag_hq = tk.Label(
         painel_info,
-        text="📄 Página Atual: 0\n",
         fg=COR_TEXTO,
         bg=COR_DO_PAINEL,
-        font=("Arial", 11)
+        font=("Arial", 14)
     )
 
     pag_hq.pack(
@@ -350,8 +356,33 @@ def iniciar_interface():
     # Guarda a lista de Hqs que está sendo mostrada atualmente
     hqs_atual = hqs
 
-    # Guarda o nível atual da biblioteca
+    # Guarda o nível atual da biblioteca:
     nivel_atual = "hqs"
+
+    # Guarda qual biblioteca organizada está ativa (marvel ou dc)
+    biblioteca_atual = None
+
+    # Guarda a lista de nomes de personagens mostrada atualmente,
+    # na mesma ordem em que aparecem na lista_hqs
+    personagens_atual = []
+
+    # Guarda o nome do personagem selecionado, usado quando
+    personagem_atual = None
+
+    # Guarda a lista de nomes das pastas de HQ do personagem atual
+    # na mesma ordem em que aparecem na lista_hqs
+    hqs_personagem_atual = []
+
+    # Guarda a lista de subpastas da HQ atual
+    subpastas_atual = []
+
+    # Guarda a HQ atualmente selecionada para navegação
+    hq_atual_navegacao = None
+
+    # Pilha de navegação: guarda, em ordem, as telas por onde o usuário
+    # passou, para que o botão "VOLTAR" saiba reconstruir a tela anterior.
+    # Cada item é uma tupla começando com o tipo de tela:
+    pilha_navegacao = []
 
     # Função para carregar todas as HQs
     def carregar_todas():
@@ -363,6 +394,9 @@ def iniciar_interface():
 
         hqs_atual = hqs
 
+        # é feito para zerar o histórico de navegação
+        pilha_navegacao.clear()
+
         carregar_hq_interface(
             lista_hqs,
             hqs_atual
@@ -372,10 +406,14 @@ def iniciar_interface():
     def mostrar_personagens(biblioteca):
 
         nonlocal nivel_atual
+        nonlocal biblioteca_atual
+        nonlocal personagens_atual
 
         nivel_atual = "personagens"
 
-        personagens = listar_personagens(
+        biblioteca_atual = biblioteca
+
+        personagens_atual = listar_personagens(
             biblioteca
         )
 
@@ -384,7 +422,7 @@ def iniciar_interface():
             tk.END
         )
 
-        for personagem in personagens:
+        for personagem in personagens_atual:
 
             lista_hqs.insert(
                 tk.END,
@@ -394,6 +432,12 @@ def iniciar_interface():
     # Função para carregar somente as HQs da Marvel
     def carregar_marvel():
 
+        # Guarda a tela atual (o que estava sendo mostrado antes)
+        # para o botão VOLTAR poder reconstruí-la depois
+        pilha_navegacao.append(
+            ("hqs", hqs_atual)
+        )
+
         mostrar_personagens(
             biblioteca_marvel
         )
@@ -401,9 +445,185 @@ def iniciar_interface():
     # Função para carregar somente as HQs da DC
     def carregar_dc():
 
+        pilha_navegacao.append(
+            ("hqs", hqs_atual)
+        )
+
         mostrar_personagens(
             biblioteca_dc
         )
+
+    # Função para mostrar as pastas de HQ de um personagem específico
+    # (ex: "Justiceiro 2011", "Justiceiro Especial")
+    def mostrar_hqs_personagem(biblioteca, personagem):
+
+        nonlocal nivel_atual
+        nonlocal personagem_atual
+        nonlocal hqs_personagem_atual
+
+        nivel_atual = "hqs_personagem"
+
+        personagem_atual = personagem
+
+        hqs_personagem_atual = listar_hqs(
+            biblioteca,
+            personagem
+        )
+
+        lista_hqs.delete(
+            0,
+            tk.END
+        )
+
+        for nome_hq in hqs_personagem_atual:
+
+            lista_hqs.insert(
+                tk.END,
+                nome_hq
+            )
+
+    # Função para mostrar as edições e subpastas de uma pasta de HQ específica
+    def mostrar_edicoes_hq(biblioteca, personagem, nome_hq):
+
+        nonlocal hqs_atual
+        nonlocal nivel_atual
+        nonlocal subpastas_atual
+        nonlocal hq_atual_navegacao
+
+        edicoes = listar_edicoes(
+            biblioteca,
+            personagem,
+            nome_hq
+        )
+
+        subpastas = listar_subpastas(
+            biblioteca,
+            personagem,
+            nome_hq
+        )
+
+        hq_atual_navegacao = nome_hq
+
+        # Se existem subpastas, mostra elas separadamente
+        # das edições principais
+        if subpastas:
+
+            nivel_atual = "subpastas"
+
+            subpastas_atual = list(subpastas.keys())
+
+            lista_hqs.delete(
+                0,
+                tk.END
+            )
+
+            # Mostra primeiro as edições principais
+            for edicao in edicoes:
+
+                lista_hqs.insert(
+                    tk.END,
+                    edicao.name
+                )
+
+            # Depois mostra as subpastas
+            for nome_subpasta in subpastas_atual:
+
+                lista_hqs.insert(
+                    tk.END,
+                    f"📁 {nome_subpasta}"
+                )
+
+            # Guarda as edições principais
+            hqs_atual = edicoes
+
+        else:
+
+            # Não existem subpastas
+            nivel_atual = "hqs"
+
+            hqs_atual = edicoes
+
+            carregar_hq_interface(
+                lista_hqs,
+                hqs_atual
+            )
+
+    # Função para mostrar as edições de uma subpasta
+    def mostrar_edicoes_subpasta(biblioteca, personagem, nome_hq, nome_subpasta):
+
+        nonlocal nivel_atual
+        nonlocal hqs_atual
+
+        hqs_subpasta = listar_hqs_subpasta(
+            biblioteca,
+            personagem,
+            nome_hq,
+            nome_subpasta
+        )
+
+        hqs_atual = hqs_subpasta
+
+        nivel_atual = "hqs"
+
+        carregar_hq_interface(
+            lista_hqs,
+            hqs_atual
+        )
+
+    # Função chamada pelo botão VOLTAR: desempilha a última tela
+    # guardada em pilha_navegacao e reconstrói ela na lista_hqs
+    def voltar():
+
+        nonlocal hqs_atual
+        nonlocal nivel_atual
+
+        # Se não há histórico, não há para onde voltar
+        if not pilha_navegacao:
+
+            print("Não há tela anterior para voltar.")
+
+            return
+
+        tela_anterior = pilha_navegacao.pop()
+
+        tipo = tela_anterior[0]
+
+        if tipo == "hqs":
+
+            # tela_anterior é ("hqs", lista_de_arquivos)
+            nivel_atual = "hqs"
+
+            hqs_atual = tela_anterior[1]
+
+            carregar_hq_interface(
+                lista_hqs,
+                hqs_atual
+            )
+
+        elif tipo == "personagens":
+
+            # tela_anterior é ("personagens", biblioteca)
+            # Chama mostrar_personagens diretamente (sem empilhar de novo)
+            mostrar_personagens(
+                tela_anterior[1]
+            )
+
+        elif tipo == "hqs_personagem":
+
+            # tela_anterior é ("hqs_personagem", biblioteca, personagem)
+            # Chama mostrar_hqs_personagem diretamente (sem empilhar de novo)
+            mostrar_hqs_personagem(
+                tela_anterior[1],
+                tela_anterior[2]
+            )
+
+        elif tipo == "subpastas":
+
+            mostrar_edicoes_hq(
+                tela_anterior[1],
+                tela_anterior[2],
+                tela_anterior[3]
+            )
 
     # Botão para Carregar HQ,
     # command=lambda: dar um comando para chamar a função carregar_hq_interface
@@ -452,7 +672,32 @@ def iniciar_interface():
         side="left",
         expand=True,
         fill="x",
-        padx=(10, 0)
+        padx=(10, 0),
+        ipady=8
+    )
+
+    # Botão para Voltar um nível na navegação,
+    # command=voltar: chama a função que desempilha a tela anterior
+    button_voltar = ctk.CTkButton(
+        painel_acao,
+        text="VOLTAR",
+        command=voltar,
+        fg_color="#2A2A32",
+        hover_color="#3A3A45",
+        text_color="#FFFFFF",
+        corner_radius=10,
+        height=40,
+        font=("Arial", 11, "bold"),
+        cursor="hand2"
+    )
+
+    # Posiciona o Botão de Voltar dentro do Frame
+    button_voltar.pack(
+        side="left",
+        expand=True,
+        fill="x",
+        padx=(10, 0),
+        ipady=8
     )
 
     # Botão para carregar somente as HQs da Marvel
@@ -495,14 +740,18 @@ def iniciar_interface():
         side="left",
         expand=True,
         fill="x",
-        padx=(5, 5),
+        padx=(5, 15),
         ipady=8
     )
 
-    # Evento responsável por detectar quando uma HQ é selecionada
-    lista_hqs.bind(
-        "<<ListboxSelect>>",
-        lambda evento: (
+    # Função central que decide o que fazer quando um item da lista
+    # é selecionado, de acordo com o nível de navegação atual
+    def ao_selecionar_item(evento):
+
+        nonlocal hqs_atual
+
+        if nivel_atual == "hqs":
+
             selecionar_hq(
                 lista_hqs,
                 hqs_atual,
@@ -510,9 +759,111 @@ def iniciar_interface():
                 capa_hq,
                 pag_hq
             )
-            if nivel_atual == "hqs"
-            else None
-        )
+
+        elif nivel_atual == "personagens":
+
+            selecao = lista_hqs.curselection()
+
+            if selecao:
+
+                personagem = personagens_atual[selecao[0]]
+
+                # Guarda a tela de personagens atual antes de avançar,
+                # para o botão VOLTAR poder reconstruí-la depois
+                pilha_navegacao.append(
+                    ("personagens", biblioteca_atual)
+                )
+
+                mostrar_hqs_personagem(
+                    biblioteca_atual,
+                    personagem
+                )
+
+        elif nivel_atual == "hqs_personagem":
+
+            selecao = lista_hqs.curselection()
+
+            if selecao:
+
+                nome_hq = hqs_personagem_atual[selecao[0]]
+
+                # Guarda a tela de pastas de HQ atual antes de avançar,
+                # para o botão VOLTAR poder reconstruí-la depois
+                pilha_navegacao.append(
+                    (
+                        "hqs_personagem",
+                        biblioteca_atual,
+                        personagem_atual
+                    )
+                )
+
+                mostrar_edicoes_hq(
+                    biblioteca_atual,
+                    personagem_atual,
+                    nome_hq
+                )
+
+        elif nivel_atual == "subpastas":
+
+            selecao = lista_hqs.curselection()
+
+            if not selecao:
+                return
+
+            indice = selecao[0]
+
+            edicoes = listar_edicoes(
+                biblioteca_atual,
+                personagem_atual,
+                hq_atual_navegacao
+            )
+
+            subpastas = listar_subpastas(
+                biblioteca_atual,
+                personagem_atual,
+                hq_atual_navegacao
+            )
+
+            # As primeiras posições pertencem às edições principais
+            if indice < len(edicoes):
+
+                selecionar_hq(
+                    lista_hqs,
+                    edicoes,
+                    texto_selecao,
+                    capa_hq,
+                    pag_hq
+                )
+
+            else:
+
+                indice_subpasta = indice - len(edicoes)
+
+                nome_subpasta = subpastas_atual[
+                    indice_subpasta
+                ]
+
+                pilha_navegacao.append(
+                    (
+                        "subpastas",
+                        biblioteca_atual,
+                        personagem_atual,
+                        hq_atual_navegacao
+                    )
+                )
+
+                mostrar_edicoes_subpasta(
+                    biblioteca_atual,
+                    personagem_atual,
+                    hq_atual_navegacao,
+                    nome_subpasta
+                )
+
+    # Evento responsável por detectar quando um item é selecionado
+    # (seja uma HQ ou um personagem, dependendo do nível atual)
+    lista_hqs.bind(
+        "<<ListboxSelect>>",
+        ao_selecionar_item
     )
 
     # Loop da interface, ao fechar será cancelado o loop

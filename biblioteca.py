@@ -226,6 +226,8 @@ def listar_hqs(estrutura, personagem):
 
     return hqs
 
+
+# Função responsável por listar as edições de uma HQ
 def listar_edicoes(estrutura, personagem, nome_hq):
 
     if personagem not in estrutura:
@@ -236,6 +238,8 @@ def listar_edicoes(estrutura, personagem, nome_hq):
 
     return estrutura[personagem][nome_hq]["edicoes"]
 
+
+# Função responsável por listar as subpastas de uma HQ
 def listar_subpastas(estrutura, personagem, nome_hq):
 
     if personagem not in estrutura:
@@ -245,6 +249,7 @@ def listar_subpastas(estrutura, personagem, nome_hq):
         return {}
 
     return estrutura[personagem][nome_hq]["subpastas"]
+
 
 def listar_hqs_subpasta(estrutura, personagem, nome_hq, nome_subpasta):
 
@@ -260,6 +265,8 @@ def listar_hqs_subpasta(estrutura, personagem, nome_hq, nome_subpasta):
         return []
 
     return subpastas[nome_subpasta]
+
+
 # Função responsável por contar as páginas da HQ
 def contar_paginas(hq):
 
@@ -329,4 +336,3 @@ def contar_paginas(hq):
             )
 
     return 0
-

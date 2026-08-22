@@ -9,3 +9,4 @@ from config import caminho_YacReader
 #  str pra deixar o tipo de hq em string
 def abrir_hq(hq: Path):
     subprocess.Popen([caminho_YacReader, str(hq)])
+
