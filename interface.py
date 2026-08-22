@@ -27,6 +27,13 @@ COR_TEXTO = "#FFFFFF"
 COR_TEXTO_SECUNDARIO = "#A0A0AA"
 COR_DESTAQUE = "#E63946"
 
+# Cores adicionais para a nova aparência
+COR_CARD = "#202027"
+COR_CARD_HOVER = "#292931"
+COR_BORDA = "#30303A"
+COR_VERDE = "#55D187"
+COR_AZUL = "#5B8DEF"
+
 
 # Função de carregar hq dentro da interface,
 # recebe uma lista de Hqs e mostra elas na biblioteca
@@ -41,7 +48,16 @@ def carregar_hq_interface(lista_hqs, hqs):
 
 
 # Foi criado para Selecionar as hqs na interface
-def selecionar_hq(lista_hqs, hqs, texto_selecao, capa_hq, pag_hq):
+def selecionar_hq(
+    lista_hqs,
+    hqs,
+    texto_selecao,
+    capa_hq,
+    pag_hq,
+    formato_hq,
+    editora_hq,
+    personagem_hq
+):
 
     selecao = lista_hqs.curselection()
 
@@ -53,14 +69,21 @@ def selecionar_hq(lista_hqs, hqs, texto_selecao, capa_hq, pag_hq):
 
         # Atualiza o texto do painel de informações
         texto_selecao.config(
-            text=f"HQ selecionada:\n\n{hq.name}"
+            text=hq.name
         )
 
         # Conta a quantidade de páginas da HQ
         paginas = contar_paginas(hq)
 
         pag_hq.config(
-            text=f"📄 {paginas} páginas"
+            text=f"📄  {paginas} páginas"
+        )
+
+        # Mostra o formato do arquivo
+        formato = hq.suffix.upper()
+
+        formato_hq.config(
+            text=f"📦  {formato}"
         )
 
         dados_capa = pegar_capa(hq)
@@ -87,6 +110,12 @@ def selecionar_hq(lista_hqs, hqs, texto_selecao, capa_hq, pag_hq):
         else:
 
             print("Capa não encontrada!")
+
+            capa_hq.config(
+                image=""
+            )
+
+            capa_hq.image = None
 
 
 # Foi Criado para abrir a hq selecionada na interface
@@ -140,10 +169,10 @@ def iniciar_interface():
     # Título principal do programa
     titulo = tk.Label(
         cabeçalho,
-        text="HQ Launcher",
+        text="HQ LAUNCHER",
         fg=COR_TEXTO,
         bg=COR_DO_FUNDO,
-        font=("Arial", 26, "bold")
+        font=("Segoe UI", 28, "bold")
     )
 
     # Alinha o título à esquerda
@@ -155,13 +184,138 @@ def iniciar_interface():
         text="Minha Biblioteca de HQs",
         fg=COR_TEXTO_SECUNDARIO,
         bg=COR_DO_FUNDO,
-        font=("Arial", 14)
+        font=("Segoe UI", 12)
     )
 
     # Posiciona o subtítulo abaixo do título
     subtitulo.pack(
         anchor="w",
-        pady=(3, 0)
+        pady=(2, 12)
+    )
+
+    # Área onde ficarão as informações resumidas da biblioteca
+    painel_estatisticas = tk.Frame(
+        cabeçalho,
+        bg=COR_DO_FUNDO
+    )
+
+    painel_estatisticas.pack(
+        fill="x"
+    )
+
+    # Card responsável pelo total de edições
+    card_edicoes = tk.Frame(
+        painel_estatisticas,
+        bg=COR_CARD,
+        highlightbackground=COR_BORDA,
+        highlightthickness=1,
+        width=155,
+        height=42
+    )
+
+    card_edicoes.pack(
+        side="left",
+        padx=(0, 8)
+    )
+
+    card_edicoes.pack_propagate(False)
+
+    label_total_edicoes = tk.Label(
+        card_edicoes,
+        text="0",
+        fg=COR_TEXTO,
+        bg=COR_CARD,
+        font=("Segoe UI", 16, "bold")
+    )
+
+    label_total_edicoes.pack(
+        side="left",
+        padx=(12, 5)
+    )
+
+    label_edicoes_texto = tk.Label(
+        card_edicoes,
+        text="EDIÇÕES",
+        fg=COR_TEXTO_SECUNDARIO,
+        bg=COR_CARD,
+        font=("Segoe UI", 9, "bold")
+    )
+
+    label_edicoes_texto.pack(
+        side="left",
+        padx=(0, 12)
+    )
+
+    # Card responsável pelo total de personagens/equipes
+    card_personagens = tk.Frame(
+        painel_estatisticas,
+        bg=COR_CARD,
+        highlightbackground=COR_BORDA,
+        highlightthickness=1,
+        width=155,
+        height=42
+    )
+
+    card_personagens.pack(
+        side="left",
+        padx=8
+    )
+
+    card_personagens.pack_propagate(False)
+
+    label_total_personagens = tk.Label(
+        card_personagens,
+        text="0",
+        fg=COR_TEXTO,
+        bg=COR_CARD,
+        font=("Segoe UI", 16, "bold")
+    )
+
+    label_total_personagens.pack(
+        side="left",
+        padx=(12, 5)
+    )
+
+    label_personagens_texto = tk.Label(
+        card_personagens,
+        text="PERSONAGENS",
+        fg=COR_TEXTO_SECUNDARIO,
+        bg=COR_CARD,
+        font=("Segoe UI", 9, "bold")
+    )
+
+    label_personagens_texto.pack(
+        side="left",
+        padx=(0, 12)
+    )
+
+    # Card responsável pela editora atual
+    card_editora = tk.Frame(
+        painel_estatisticas,
+        bg=COR_CARD,
+        highlightbackground=COR_BORDA,
+        highlightthickness=1,
+        width=155,
+        height=42
+    )
+
+    card_editora.pack(
+        side="left",
+        padx=8
+    )
+
+    card_editora.pack_propagate(False)
+
+    label_editora = tk.Label(
+        card_editora,
+        text="TODAS",
+        fg=COR_TEXTO,
+        bg=COR_CARD,
+        font=("Segoe UI", 10, "bold")
+    )
+
+    label_editora.pack(
+        expand=True
     )
 
     # Área onde ficarão os principais elementos do Launcher
@@ -210,33 +364,65 @@ def iniciar_interface():
     # Título do painel de informações
     titulo_informacoes = tk.Label(
         painel_info,
-        text="📖 Informações",
+        text="📖  INFORMAÇÕES",
         fg=COR_TEXTO,
         bg=COR_DO_PAINEL,
-        font=("Arial", 12, "bold")
+        font=("Segoe UI", 13, "bold")
     )
 
     # Posiciona o título dentro do painel
     titulo_informacoes.pack(
         anchor="w",
         padx=20,
-        pady=(10, 0)
+        pady=(15, 5)
     )
 
-    # Texto que será mostrado quando nenhuma HQ estiver selecionada
+    # Área onde será mostrado o nome da HQ selecionada
     texto_selecao = tk.Label(
         painel_info,
         text="Nenhuma HQ selecionada",
-        fg=COR_TEXTO_SECUNDARIO,
+        fg=COR_TEXTO,
         bg=COR_DO_PAINEL,
-        font=('Arial', 12, "bold")
+        font=("Segoe UI", 15, "bold"),
+        justify="left",
+        wraplength=310
     )
 
     # Posiciona o texto dentro do painel
     texto_selecao.pack(
         anchor="w",
-        padx=10,
-        pady=10
+        padx=20,
+        pady=(5, 8)
+    )
+
+    # Informação da editora da HQ
+    editora_hq = tk.Label(
+        painel_info,
+        text="",
+        fg=COR_TEXTO_SECUNDARIO,
+        bg=COR_DO_PAINEL,
+        font=("Segoe UI", 10, "bold")
+    )
+
+    editora_hq.pack(
+        anchor="w",
+        padx=20,
+        pady=(0, 5)
+    )
+
+    # Informação do personagem da HQ
+    personagem_hq = tk.Label(
+        painel_info,
+        text="",
+        fg=COR_TEXTO_SECUNDARIO,
+        bg=COR_DO_PAINEL,
+        font=("Segoe UI", 10, "bold")
+    )
+
+    personagem_hq.pack(
+        anchor="w",
+        padx=20,
+        pady=(0, 8)
     )
 
     # Área onde será mostrada a capa da HQ selecionada
@@ -247,20 +433,50 @@ def iniciar_interface():
 
     # Posiciona a capa dentro do painel
     capa_hq.pack(
-        pady=13
+        pady=10
+    )
+
+    # Área para mostrar informações técnicas da HQ
+    painel_detalhes = tk.Frame(
+        painel_info,
+        bg=COR_CARD,
+        highlightbackground=COR_BORDA,
+        highlightthickness=1
+    )
+
+    painel_detalhes.pack(
+        fill="x",
+        padx=20,
+        pady=(5, 15)
     )
 
     # Informação das páginas da HQ
     pag_hq = tk.Label(
-        painel_info,
+        painel_detalhes,
+        text="📄  -- páginas",
         fg=COR_TEXTO,
-        bg=COR_DO_PAINEL,
-        font=("Arial", 14)
+        bg=COR_CARD,
+        font=("Segoe UI", 11, "bold")
     )
 
     pag_hq.pack(
-        anchor="w",
-        padx=20,
+        side="left",
+        padx=12,
+        pady=10
+    )
+
+    # Informação do formato da HQ
+    formato_hq = tk.Label(
+        painel_detalhes,
+        text="📦  --",
+        fg=COR_TEXTO_SECUNDARIO,
+        bg=COR_CARD,
+        font=("Segoe UI", 10, "bold")
+    )
+
+    formato_hq.pack(
+        side="right",
+        padx=12,
         pady=10
     )
 
@@ -270,7 +486,7 @@ def iniciar_interface():
         text="📚 Biblioteca",
         fg=COR_TEXTO,
         bg=COR_DO_PAINEL,
-        font=("Arial", 14, "bold")
+        font=("Segoe UI", 15, "bold")
     )
 
     # Posiciona o título dentro do painel
@@ -280,6 +496,26 @@ def iniciar_interface():
         pady=(20, 10)
     )
 
+    # Barra de pesquisa da biblioteca
+    barra_pesquisa = ctk.CTkEntry(
+        painel_biblioteca,
+        placeholder_text="🔎  Pesquisar...",
+        fg_color=COR_DO_FUNDO,
+        border_color=COR_BORDA,
+        text_color=COR_TEXTO,
+        placeholder_text_color=COR_TEXTO_SECUNDARIO,
+        corner_radius=10,
+        height=38,
+        font=("Segoe UI", 11)
+    )
+
+    # Posiciona a barra de pesquisa acima da lista
+    barra_pesquisa.pack(
+        fill="x",
+        padx=20,
+        pady=(0, 10)
+    )
+
     # Componente para Lista de HQs na interface
     lista_hqs = tk.Listbox(
         painel_biblioteca,
@@ -287,9 +523,11 @@ def iniciar_interface():
         fg=COR_TEXTO,
         selectbackground=COR_DESTAQUE,
         selectforeground=COR_TEXTO,
-        font=("Arial", 11),
+        font=("Segoe UI", 11),
         relief="flat",
-        highlightthickness=0
+        highlightthickness=0,
+        activestyle="none",
+        bd=0
     )
 
     # Posiciona a lista de hqs dentro do painel
@@ -384,6 +622,57 @@ def iniciar_interface():
     # Cada item é uma tupla começando com o tipo de tela:
     pilha_navegacao = []
 
+    # Guarda os itens que estão atualmente visíveis na pesquisa
+    itens_pesquisa_atual = []
+
+    # Atualiza as informações do cabeçalho
+    def atualizar_estatisticas(biblioteca, nome_editora):
+
+        if biblioteca is None:
+
+            total_edicoes = len(hqs)
+
+            personagens = set()
+
+            for personagem in biblioteca_marvel:
+                personagens.add(personagem)
+
+            for personagem in biblioteca_dc:
+                personagens.add(personagem)
+
+            total_personagens = len(personagens)
+
+        else:
+
+            total_edicoes = 0
+
+            for personagem in biblioteca:
+
+                for nome_hq in biblioteca[personagem]:
+
+                    total_edicoes += len(
+                        biblioteca[personagem][nome_hq]["edicoes"]
+                    )
+
+                    subpastas = biblioteca[personagem][nome_hq]["subpastas"]
+
+                    for arquivos in subpastas.values():
+                        total_edicoes += len(arquivos)
+
+            total_personagens = len(biblioteca)
+
+        label_total_edicoes.config(
+            text=str(total_edicoes)
+        )
+
+        label_total_personagens.config(
+            text=str(total_personagens)
+        )
+
+        label_editora.config(
+            text=nome_editora
+        )
+
     # Função para carregar todas as HQs
     def carregar_todas():
 
@@ -396,6 +685,43 @@ def iniciar_interface():
 
         # é feito para zerar o histórico de navegação
         pilha_navegacao.clear()
+
+        atualizar_estatisticas(
+            None,
+            "TODAS"
+        )
+
+        # Limpa as informações anteriores
+        texto_selecao.config(
+            text="Nenhuma HQ selecionada"
+        )
+
+        editora_hq.config(
+            text=""
+        )
+
+        personagem_hq.config(
+            text=""
+        )
+
+        pag_hq.config(
+            text="📄  -- páginas"
+        )
+
+        formato_hq.config(
+            text="📦  --"
+        )
+
+        capa_hq.config(
+            image=""
+        )
+
+        capa_hq.image = None
+
+        barra_pesquisa.delete(
+            0,
+            tk.END
+        )
 
         carregar_hq_interface(
             lista_hqs,
@@ -422,11 +748,38 @@ def iniciar_interface():
             tk.END
         )
 
+        # Atualiza o painel de informações
+        texto_selecao.config(
+            text="Selecione um personagem"
+        )
+
+        editora_hq.config(
+            text="🦸  Personagens e equipes"
+        )
+
+        personagem_hq.config(
+            text=f"📚  {len(personagens_atual)} encontrados"
+        )
+
+        pag_hq.config(
+            text=""
+        )
+
+        formato_hq.config(
+            text=""
+        )
+
+        capa_hq.config(
+            image=""
+        )
+
+        capa_hq.image = None
+
         for personagem in personagens_atual:
 
             lista_hqs.insert(
                 tk.END,
-                personagem
+                f"  {personagem}"
             )
 
     # Função para carregar somente as HQs da Marvel
@@ -438,6 +791,16 @@ def iniciar_interface():
             ("hqs", hqs_atual)
         )
 
+        atualizar_estatisticas(
+            biblioteca_marvel,
+            "MARVEL"
+        )
+
+        barra_pesquisa.delete(
+            0,
+            tk.END
+        )
+
         mostrar_personagens(
             biblioteca_marvel
         )
@@ -447,6 +810,16 @@ def iniciar_interface():
 
         pilha_navegacao.append(
             ("hqs", hqs_atual)
+        )
+
+        atualizar_estatisticas(
+            biblioteca_dc,
+            "DC"
+        )
+
+        barra_pesquisa.delete(
+            0,
+            tk.END
         )
 
         mostrar_personagens(
@@ -475,11 +848,38 @@ def iniciar_interface():
             tk.END
         )
 
+        # Atualiza o painel de informações
+        texto_selecao.config(
+            text=personagem
+        )
+
+        editora_hq.config(
+            text="🦸  Personagem / Equipe"
+        )
+
+        personagem_hq.config(
+            text=f"📚  {len(hqs_personagem_atual)} séries encontradas"
+        )
+
+        pag_hq.config(
+            text=""
+        )
+
+        formato_hq.config(
+            text=""
+        )
+
+        capa_hq.config(
+            image=""
+        )
+
+        capa_hq.image = None
+
         for nome_hq in hqs_personagem_atual:
 
             lista_hqs.insert(
                 tk.END,
-                nome_hq
+                f"  {nome_hq}"
             )
 
     # Função para mostrar as edições e subpastas de uma pasta de HQ específica
@@ -504,6 +904,33 @@ def iniciar_interface():
 
         hq_atual_navegacao = nome_hq
 
+        # Atualiza o painel de informações
+        texto_selecao.config(
+            text=nome_hq
+        )
+
+        editora_hq.config(
+            text=f"📚  {label_editora.cget('text')}"
+        )
+
+        personagem_hq.config(
+            text=f"🦸  {personagem}"
+        )
+
+        pag_hq.config(
+            text=f"📖  {len(edicoes)} edições"
+        )
+
+        formato_hq.config(
+            text=f"📁  {len(subpastas)} pastas"
+        )
+
+        capa_hq.config(
+            image=""
+        )
+
+        capa_hq.image = None
+
         # Se existem subpastas, mostra elas separadamente
         # das edições principais
         if subpastas:
@@ -522,7 +949,7 @@ def iniciar_interface():
 
                 lista_hqs.insert(
                     tk.END,
-                    edicao.name
+                    f"  {edicao.name}"
                 )
 
             # Depois mostra as subpastas
@@ -530,7 +957,7 @@ def iniciar_interface():
 
                 lista_hqs.insert(
                     tk.END,
-                    f"📁 {nome_subpasta}"
+                    f"  📁 {nome_subpasta}"
                 )
 
             # Guarda as edições principais
@@ -549,7 +976,12 @@ def iniciar_interface():
             )
 
     # Função para mostrar as edições de uma subpasta
-    def mostrar_edicoes_subpasta(biblioteca, personagem, nome_hq, nome_subpasta):
+    def mostrar_edicoes_subpasta(
+        biblioteca,
+        personagem,
+        nome_hq,
+        nome_subpasta
+    ):
 
         nonlocal nivel_atual
         nonlocal hqs_atual
@@ -564,6 +996,33 @@ def iniciar_interface():
         hqs_atual = hqs_subpasta
 
         nivel_atual = "hqs"
+
+        # Atualiza o painel de informações
+        texto_selecao.config(
+            text=nome_subpasta
+        )
+
+        editora_hq.config(
+            text=f"📁  {nome_hq}"
+        )
+
+        personagem_hq.config(
+            text=f"🦸  {personagem}"
+        )
+
+        pag_hq.config(
+            text=f"📖  {len(hqs_subpasta)} edições"
+        )
+
+        formato_hq.config(
+            text="📦  Subpasta"
+        )
+
+        capa_hq.config(
+            image=""
+        )
+
+        capa_hq.image = None
 
         carregar_hq_interface(
             lista_hqs,
@@ -587,6 +1046,11 @@ def iniciar_interface():
         tela_anterior = pilha_navegacao.pop()
 
         tipo = tela_anterior[0]
+
+        barra_pesquisa.delete(
+            0,
+            tk.END
+        )
 
         if tipo == "hqs":
 
@@ -625,6 +1089,114 @@ def iniciar_interface():
                 tela_anterior[3]
             )
 
+    # Função responsável por pesquisar dentro da tela atual
+    def pesquisar(evento=None):
+
+        nonlocal itens_pesquisa_atual
+
+        termo = barra_pesquisa.get().strip().lower()
+
+        lista_hqs.delete(
+            0,
+            tk.END
+        )
+
+        itens_pesquisa_atual = []
+
+        if nivel_atual == "hqs":
+
+            itens_pesquisa_atual = [
+                hq
+                for hq in hqs_atual
+                if termo in hq.name.lower()
+            ]
+
+            for hq in itens_pesquisa_atual:
+
+                lista_hqs.insert(
+                    tk.END,
+                    hq.name
+                )
+
+        elif nivel_atual == "personagens":
+
+            itens_pesquisa_atual = [
+                personagem
+                for personagem in personagens_atual
+                if termo in personagem.lower()
+            ]
+
+            for personagem in itens_pesquisa_atual:
+
+                lista_hqs.insert(
+                    tk.END,
+                    f"  {personagem}"
+                )
+
+        elif nivel_atual == "hqs_personagem":
+
+            itens_pesquisa_atual = [
+                nome_hq
+                for nome_hq in hqs_personagem_atual
+                if termo in nome_hq.lower()
+            ]
+
+            for nome_hq in itens_pesquisa_atual:
+
+                lista_hqs.insert(
+                    tk.END,
+                    f"  {nome_hq}"
+                )
+
+        elif nivel_atual == "subpastas":
+
+            edicoes = listar_edicoes(
+                biblioteca_atual,
+                personagem_atual,
+                hq_atual_navegacao
+            )
+
+            subpastas = listar_subpastas(
+                biblioteca_atual,
+                personagem_atual,
+                hq_atual_navegacao
+            )
+
+            # Guarda os itens da tela na mesma ordem em que aparecem
+            itens_pesquisa_atual = []
+
+            for edicao in edicoes:
+
+                if termo in edicao.name.lower():
+
+                    itens_pesquisa_atual.append(
+                        ("edicao", edicao)
+                    )
+
+                    lista_hqs.insert(
+                        tk.END,
+                        f"  {edicao.name}"
+                    )
+
+            for nome_subpasta in subpastas_atual:
+
+                if termo in nome_subpasta.lower():
+
+                    itens_pesquisa_atual.append(
+                        ("subpasta", nome_subpasta)
+                    )
+
+                    lista_hqs.insert(
+                        tk.END,
+                        f"  📁 {nome_subpasta}"
+                    )
+
+    # Evento responsável por atualizar a pesquisa enquanto o usuário digita
+    barra_pesquisa.bind(
+        "<KeyRelease>",
+        pesquisar
+    )
+
     # Botão para Carregar HQ,
     # command=lambda: dar um comando para chamar a função carregar_hq_interface
     # e mostrar as hqs com lista_hqs
@@ -636,7 +1208,7 @@ def iniciar_interface():
         hover_color="#3A3A45",
         text_color="#FFFFFF",
         corner_radius=10,
-        font=("Arial", 10, "bold"),
+        font=("Segoe UI", 10, "bold"),
         cursor="hand2"
     )
 
@@ -662,7 +1234,7 @@ def iniciar_interface():
         hover_color="#D9D9D9",
         text_color="#101014",
         corner_radius=10,
-        font=("Arial", 11, "bold"),
+        font=("Segoe UI", 11, "bold"),
         height=40,
         cursor="hand2"
     )
@@ -687,7 +1259,7 @@ def iniciar_interface():
         text_color="#FFFFFF",
         corner_radius=10,
         height=40,
-        font=("Arial", 11, "bold"),
+        font=("Segoe UI", 11, "bold"),
         cursor="hand2"
     )
 
@@ -709,7 +1281,7 @@ def iniciar_interface():
         hover_color="#EB7C7C",
         text_color="#FFFFFF",
         corner_radius=8,
-        font=("Helvetica", 11, "bold"),
+        font=("Segoe UI", 11, "bold"),
         cursor="hand2"
     )
 
@@ -731,7 +1303,7 @@ def iniciar_interface():
         hover_color="#163A63",
         text_color="#FFD700",
         corner_radius=8,
-        font=("Helvetica", 11, "bold"),
+        font=("Segoe UI", 11, "bold"),
         cursor="hand2"
     )
 
@@ -752,13 +1324,52 @@ def iniciar_interface():
 
         if nivel_atual == "hqs":
 
+            selecao = lista_hqs.curselection()
+
+            if not selecao:
+                return
+
+            indice = selecao[0]
+
+            # Quando existe pesquisa, usa a lista filtrada
+            lista_selecao = (
+                itens_pesquisa_atual
+                if barra_pesquisa.get().strip()
+                else hqs_atual
+            )
+
+            if indice >= len(lista_selecao):
+                return
+
             selecionar_hq(
                 lista_hqs,
-                hqs_atual,
+                lista_selecao,
                 texto_selecao,
                 capa_hq,
-                pag_hq
+                pag_hq,
+                formato_hq,
+                editora_hq,
+                personagem_hq
             )
+
+            # Atualiza o contexto da HQ selecionada
+            if biblioteca_atual is not None:
+
+                editora_hq.config(
+                    text=f"🏢  {label_editora.cget('text')}"
+                )
+
+                if personagem_atual:
+
+                    personagem_hq.config(
+                        text=f"🦸  {personagem_atual}"
+                    )
+
+                else:
+
+                    personagem_hq.config(
+                        text=""
+                    )
 
         elif nivel_atual == "personagens":
 
@@ -766,7 +1377,18 @@ def iniciar_interface():
 
             if selecao:
 
-                personagem = personagens_atual[selecao[0]]
+                indice = selecao[0]
+
+                lista_selecao = (
+                    itens_pesquisa_atual
+                    if barra_pesquisa.get().strip()
+                    else personagens_atual
+                )
+
+                if indice >= len(lista_selecao):
+                    return
+
+                personagem = lista_selecao[indice]
 
                 # Guarda a tela de personagens atual antes de avançar,
                 # para o botão VOLTAR poder reconstruí-la depois
@@ -785,7 +1407,18 @@ def iniciar_interface():
 
             if selecao:
 
-                nome_hq = hqs_personagem_atual[selecao[0]]
+                indice = selecao[0]
+
+                lista_selecao = (
+                    itens_pesquisa_atual
+                    if barra_pesquisa.get().strip()
+                    else hqs_personagem_atual
+                )
+
+                if indice >= len(lista_selecao):
+                    return
+
+                nome_hq = lista_selecao[indice]
 
                 # Guarda a tela de pastas de HQ atual antes de avançar,
                 # para o botão VOLTAR poder reconstruí-la depois
@@ -812,6 +1445,75 @@ def iniciar_interface():
 
             indice = selecao[0]
 
+            # Quando existe pesquisa, usa os itens filtrados
+            if barra_pesquisa.get().strip():
+
+                if indice >= len(itens_pesquisa_atual):
+                    return
+
+                tipo_item, item = itens_pesquisa_atual[indice]
+
+                if tipo_item == "edicao":
+
+                    edicoes = listar_edicoes(
+                        biblioteca_atual,
+                        personagem_atual,
+                        hq_atual_navegacao
+                    )
+
+                    indice_edicao = edicoes.index(item)
+
+                    selecionar_hq(
+                        lista_hqs,
+                        edicoes,
+                        texto_selecao,
+                        capa_hq,
+                        pag_hq,
+                        formato_hq,
+                        editora_hq,
+                        personagem_hq
+                    )
+
+                    # Seleciona temporariamente a edição correta
+                    lista_hqs.selection_clear(
+                        0,
+                        tk.END
+                    )
+
+                    lista_hqs.selection_set(
+                        indice
+                    )
+
+                    editora_hq.config(
+                        text=f"🏢  {label_editora.cget('text')}"
+                    )
+
+                    personagem_hq.config(
+                        text=f"🦸  {personagem_atual}"
+                    )
+
+                else:
+
+                    nome_subpasta = item
+
+                    pilha_navegacao.append(
+                        (
+                            "subpastas",
+                            biblioteca_atual,
+                            personagem_atual,
+                            hq_atual_navegacao
+                        )
+                    )
+
+                    mostrar_edicoes_subpasta(
+                        biblioteca_atual,
+                        personagem_atual,
+                        hq_atual_navegacao,
+                        nome_subpasta
+                    )
+
+                return
+
             edicoes = listar_edicoes(
                 biblioteca_atual,
                 personagem_atual,
@@ -832,7 +1534,18 @@ def iniciar_interface():
                     edicoes,
                     texto_selecao,
                     capa_hq,
-                    pag_hq
+                    pag_hq,
+                    formato_hq,
+                    editora_hq,
+                    personagem_hq
+                )
+
+                editora_hq.config(
+                    text=f"🏢  {label_editora.cget('text')}"
+                )
+
+                personagem_hq.config(
+                    text=f"🦸  {personagem_atual}"
                 )
 
             else:
@@ -864,6 +1577,12 @@ def iniciar_interface():
     lista_hqs.bind(
         "<<ListboxSelect>>",
         ao_selecionar_item
+    )
+
+    # Inicializa as informações da biblioteca
+    atualizar_estatisticas(
+        None,
+        "TODAS"
     )
 
     # Loop da interface, ao fechar será cancelado o loop

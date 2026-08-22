@@ -5,9 +5,14 @@ import rarfile
 import subprocess
 import tempfile
 import shutil
+import json
 
 
 rarfile.UNRAR_TOOL = r"C:\Program Files\WinRAR\WinRAR.exe"
+
+
+# Arquivo responsável por guardar a última HQ aberta
+ARQUIVO_ULTIMA_LEITURA = Path(__file__).parent / "ultima_leitura.json"
 
 
 # Função para carregar as HQs da biblioteca geral
@@ -251,7 +256,13 @@ def listar_subpastas(estrutura, personagem, nome_hq):
     return estrutura[personagem][nome_hq]["subpastas"]
 
 
-def listar_hqs_subpasta(estrutura, personagem, nome_hq, nome_subpasta):
+# Função responsável por listar HQs de uma subpasta
+def listar_hqs_subpasta(
+    estrutura,
+    personagem,
+    nome_hq,
+    nome_subpasta
+):
 
     if personagem not in estrutura:
         return []
@@ -336,3 +347,115 @@ def contar_paginas(hq):
             )
 
     return 0
+
+# Função responsável por salvar a última HQ aberta
+# de determinado personagem/equipe
+def salvar_ultima_hq(personagem, hq):
+
+    # Tenta carregar o histórico existente
+    try:
+
+        if ARQUIVO_ULTIMA_LEITURA.exists():
+
+            with open(
+                ARQUIVO_ULTIMA_LEITURA,
+                "r",
+                encoding="utf-8"
+            ) as arquivo:
+
+                historico = json.load(arquivo)
+
+        else:
+
+            historico = {}
+
+    except (
+        json.JSONDecodeError,
+        OSError
+    ):
+
+        historico = {}
+
+
+    # Salva o caminho da HQ usando o personagem
+    historico[personagem] = str(
+        Path(hq).resolve()
+    )
+
+
+    # Salva novamente o histórico no arquivo JSON
+    try:
+
+        with open(
+            ARQUIVO_ULTIMA_LEITURA,
+            "w",
+            encoding="utf-8"
+        ) as arquivo:
+
+            json.dump(
+                historico,
+                arquivo,
+                indent=4,
+                ensure_ascii=False
+            )
+
+        print(
+            f"Última HQ de {personagem} salva: {hq}"
+        )
+
+    except OSError as erro:
+
+        print(
+            f"Erro ao salvar última HQ: {erro}"
+        )
+
+
+# Função responsável por carregar a última HQ aberta
+# de determinado personagem/equipe
+def carregar_ultima_hq(personagem):
+
+    # Verifica se o arquivo de histórico existe
+    if not ARQUIVO_ULTIMA_LEITURA.exists():
+
+        return None
+
+
+    try:
+
+        with open(
+            ARQUIVO_ULTIMA_LEITURA,
+            "r",
+            encoding="utf-8"
+        ) as arquivo:
+
+            historico = json.load(arquivo)
+
+    except (
+        json.JSONDecodeError,
+        OSError
+    ):
+
+        return None
+
+
+    # Procura o personagem no histórico
+    caminho_hq = historico.get(
+        personagem
+    )
+
+    if not caminho_hq:
+
+        return None
+
+
+    # Converte o caminho salvo novamente para Path
+    hq = Path(caminho_hq)
+
+
+    # Verifica se a HQ ainda existe
+    if not hq.exists():
+
+        return None
+
+
+    return hq
