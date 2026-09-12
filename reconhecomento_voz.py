@@ -41,7 +41,37 @@ def ouvir():
         return None
 
 
+# Função responsável por interpretar o comando recebido
+def interpretar_comando(texto):
+
+    # Verifica se algum texto foi reconhecido
+    if texto is None:
+
+        return None
+
+    # Deixa o texto em letras minúsculas
+    texto = texto.lower().strip()
+
+    # Verifica se o usuário pediu para abrir a Marvel
+    if "abrir marvel" in texto:
+
+        return "marvel"
+
+    # Verifica se o usuário pediu para abrir a DC
+    if "abrir dc" in texto:
+
+        return "dc"
+
+    # Caso nenhum comando seja reconhecido
+    return None
+
+
 # Teste da função
 texto = ouvir()
 
+comando = interpretar_comando(
+    texto
+)
+
 print(f"Você disse: {texto}")
+print(f"Comando identificado: {comando}")
