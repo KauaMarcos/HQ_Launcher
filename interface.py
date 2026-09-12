@@ -17,6 +17,7 @@ from biblioteca import (
     listar_hqs_subpasta
 )
 from config import caminho_hqs_marvel, caminho_hqs_dc
+from reconhecimento_voz import ouvir, interpretar_comando
 from Launcher import abrir_hq
 import customtkinter as ctk
 
@@ -826,6 +827,25 @@ def iniciar_interface():
             biblioteca_dc
         )
 
+    # Função responsável por executar comandos de voz
+    def executar_comando_voz():
+
+        # Ouve o comando através do microfone
+        texto = ouvir()
+
+        # Interpreta o texto reconhecido
+        comando = interpretar_comando(texto)
+
+        # Abre a biblioteca da Marvel
+        if comando == "marvel":
+
+            carregar_marvel()
+
+        # Abre a biblioteca da DC
+        elif comando == "dc":
+
+            carregar_dc()
+
     # Função para mostrar as pastas de HQ de um personagem específico
     # (ex: "Justiceiro 2011", "Justiceiro Especial")
     def mostrar_hqs_personagem(biblioteca, personagem):
@@ -1218,6 +1238,29 @@ def iniciar_interface():
         expand=True,
         fill="x",
         padx=(0, 5),
+        ipady=8
+    )
+
+    # Botão para executar comandos através da voz
+    button_voz = ctk.CTkButton(
+        painel_acao,
+        text="🎤",
+        command=executar_comando_voz,
+        fg_color="#2A2A32",
+        hover_color="#3A3A45",
+        text_color="#FFFFFF",
+        corner_radius=10,
+        height=40,
+        font=("Segoe UI", 11, "bold"),
+        cursor="hand2"
+    )
+
+    # Posiciona o botão de voz
+    button_voz.pack(
+        side="left",
+        expand=True,
+        fill="x",
+        padx=(0, 0),
         ipady=8
     )
 

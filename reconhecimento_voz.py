@@ -66,12 +66,15 @@ def interpretar_comando(texto):
     return None
 
 
-# Teste da função
-texto = ouvir()
+if __name__ == "__main__":
 
-comando = interpretar_comando(
-    texto
-)
+    # Chama a função para ouvir o microfone
+    texto = ouvir()
 
-print(f"Você disse: {texto}")
-print(f"Comando identificado: {comando}")
+    # Chama a função para interpretar o comando
+    comando = interpretar_comando(
+        texto
+    )
+
+    print(f"Você disse: {texto}")
+    print(f"Comando identificado: {comando}")
