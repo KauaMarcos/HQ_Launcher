@@ -17,7 +17,7 @@ from biblioteca import (
     listar_hqs_subpasta
 )
 from config import caminho_hqs_marvel, caminho_hqs_dc
-from reconhecimento_voz import ouvir, interpretar_comando
+from reconhecimento_voz import ouvir, interpretar_comando, iniciar_escuta
 from Launcher import abrir_hq
 import customtkinter as ctk
 
@@ -846,6 +846,28 @@ def iniciar_interface():
 
             carregar_dc()
 
+    # Função responsável por executar comandos recebidos pelo microfone
+    def executar_comando_voz_continuo(comando):
+
+        # Usa o after para executar a função dentro da thread principal do Tkinter
+        janela.after(
+            0,
+            lambda: executar_comando_interface(comando)
+        )
+
+    # Função responsável por executar o comando recebido na interface
+    def executar_comando_interface(comando):
+
+        # Verifica se o comando é para abrir a Marvel
+        if comando == "marvel":
+
+            carregar_marvel()
+
+        # Verifica se o comando é para abrir a DC
+        elif comando == "dc":
+
+            carregar_dc()
+
     # Função para mostrar as pastas de HQ de um personagem específico
     # (ex: "Justiceiro 2011", "Justiceiro Especial")
     def mostrar_hqs_personagem(biblioteca, personagem):
@@ -1626,6 +1648,11 @@ def iniciar_interface():
     atualizar_estatisticas(
         None,
         "TODAS"
+    )
+
+    # Inicia a escuta contínua do microfone
+    iniciar_escuta(
+        executar_comando_voz_continuo
     )
 
     # Loop da interface, ao fechar será cancelado o loop
