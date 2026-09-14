@@ -83,7 +83,6 @@ def pegar_capa(hq):
             if imagens:
                 return arquivo.read(imagens[0])
 
-
     # Verifica se a HQ é CBR
     elif hq.suffix.lower() == ".cbr":
 
